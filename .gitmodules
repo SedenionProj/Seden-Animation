@@ -1,0 +1,16 @@
+[submodule "Seden/vendor/stb"]
+	path = Seden/vendor/stb
+	url = https://github.com/nothings/stb.git
+[submodule "Seden/vendor/glfw"]
+	path = Seden/vendor/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "Seden/vendor/glm"]
+	path = Seden/vendor/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "Seden/vendor/imgui"]
+	path = Seden/vendor/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking
+[submodule "Seden/vendor/imguizmo"]
+	path = Seden/vendor/imguizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git
