@@ -21,11 +21,10 @@ add_subdirectory(glm)
 set (IMGUI_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/imgui PARENT_SCOPE)
 file(GLOB IMGUI_SOURCE
    imgui/*.cpp
-   imgui/backends/imgui_impl_glfw.h
    imgui/backends/imgui_impl_glfw.cpp
-   imgui/backends/imgui_impl_opengl3.h
    imgui/backends/imgui_impl_opengl3.cpp
    imgui/backends/imgui_impl_opengl3_loader.cpp
+   imgui/misc/cpp/imgui_stdlib.cpp
 )
 
 add_library(imgui STATIC ${IMGUI_SOURCE})
