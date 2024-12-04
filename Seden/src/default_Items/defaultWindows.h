@@ -76,6 +76,8 @@ public:
 				}
 				ImGui::EndMenu();
 			}
+			if (ImGui::CollapsingHeader("Properties"))
+				shape->drawGui();
 			for (auto effect : shape->getEffects()) {
 				if (ImGui::CollapsingHeader(effect->getName().c_str())) {
 					effect->drawGUI();

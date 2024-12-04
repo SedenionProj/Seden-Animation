@@ -14,6 +14,7 @@ public:
 	ShaderSystem& getShader() { return shader; }
 
 	virtual void draw() = 0; // todo batch renderer
+	virtual void drawGui() = 0;
 
 	void addEffect(std::shared_ptr<Effect> effect) {
 		effects.push_back(effect); 

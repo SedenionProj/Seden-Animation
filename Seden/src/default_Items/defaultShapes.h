@@ -22,6 +22,8 @@ public:
 		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4,instanceCount);
 	}
 
+	void drawGui() override {}
+
 	void createQuad() {
 		float vertices[]{
 			-1.f, -1.f,
@@ -82,18 +84,27 @@ public:
 		addEffect(std::make_shared<SolidColorEff>());
 		addEffect(std::make_shared<Instance>());
 		
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		fread(ttf_buffer, 1, 1 << 20, fopen("c:/windows/fonts/times.ttf", "rb"));
+		reloadText();
+
+	}
+
+	void reloadText() {
+		unsigned char* ttf_buffer = (unsigned char*)malloc(1 << 20);
+		unsigned char temp_bitmap[512 * 512];
+
+		std::string fontPath = "c:/windows/fonts/" + fontName;
+
+		fread(ttf_buffer, 1, 1 << 20, fopen(fontPath.c_str(), "rb"));
 		stbtt_BakeFontBitmap(ttf_buffer, 0, 32.0, temp_bitmap, 512, 512, 32, 96, cdata);
-		// can free ttf_buffer at this point
+		free(ttf_buffer);
 		glGenTextures(1, &ftex);
 		glBindTexture(GL_TEXTURE_2D, ftex);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, temp_bitmap);
 		// can free temp_bitmap at this point
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 	}
 
 	void draw() override {
@@ -106,6 +117,22 @@ public:
 		shader.setInt("uTexture", 0);
 		glBindVertexArray(quadVBO);
 		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, instanceCount);
+	}
+
+	void drawGui() override {
+		ImGui::Text("text window");
+		ImGui::InputText("Text", &text);
+		if (ImGui::BeginMenu("font")) {
+			for (const auto& entry : fs::directory_iterator("c:/windows/fonts")) {
+				std::string currFont = entry.path().filename().string();
+				if ( ImGui::MenuItem(currFont.c_str() ) ) {
+					fontName = currFont;
+					reloadText();
+				};
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::CollapsingHeader("letters")){}
 	}
 
 	void createQuad() {
@@ -127,8 +154,8 @@ public:
 		glEnableVertexAttribArray(0);
 	}
 private:
-	unsigned char ttf_buffer[1 << 20];
-	unsigned char temp_bitmap[512 * 512];
+	std::string text = "new text";
+	std::string fontName = "times.ttf";
 
 	stbtt_bakedchar cdata[96]; // ASCII 32..126 is 95 glyphs
 	GLuint ftex;
