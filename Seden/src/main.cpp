@@ -2,7 +2,7 @@
 
 int main() {
 	try {
-		Application app;
+		Seden::Application app;
 		app.start();
 	}
 	catch (const std::exception& e) {

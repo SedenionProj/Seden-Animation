@@ -8,63 +8,66 @@
 
 #include "src/plugin_api/IPlugin.h"
 
-namespace fs = std::filesystem;
-typedef IPlugin* (*CreatePlugin)(ImGuiContext*);
-typedef void (*DestroyPlugin)(IPlugin*);
+namespace Seden {
 
-struct PluginHandle {
-	HMODULE handle;
-	IPlugin* plugin;
-	DestroyPlugin destroy;
-};
+	namespace fs = std::filesystem;
+	typedef IPlugin* (*CreatePlugin)(ImGuiContext*);
+	typedef void (*DestroyPlugin)(IPlugin*);
 
-class PluginSystem {
-public:
-	void loadPlugins(const std::string& pluginDir, std::vector<PluginHandle>& plugins) {
-		for (const auto& entry : fs::directory_iterator(pluginDir)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".dll") {
-				std::wstring path = entry.path().wstring();
-				HMODULE handle = LoadLibraryW(path.c_str());
+	struct PluginHandle {
+		HMODULE handle;
+		IPlugin* plugin;
+		DestroyPlugin destroy;
+	};
 
-				if (!handle) {
-					std::cerr << "Cannot load plugin: " << GetLastError() << std::endl;
-					continue;
-				}
+	class PluginSystem {
+	public:
+		void loadPlugins(const std::string& pluginDir, std::vector<PluginHandle>& plugins) {
+			for (const auto& entry : fs::directory_iterator(pluginDir)) {
+				if (entry.is_regular_file() && entry.path().extension() == ".dll") {
+					std::wstring path = entry.path().wstring();
+					HMODULE handle = LoadLibraryW(path.c_str());
 
-				// Load the create and destroy functions
-				CreatePlugin createPlugin = (CreatePlugin)GetProcAddress(handle, "create");
-				DestroyPlugin destroyPlugin = (DestroyPlugin)GetProcAddress(handle, "destroy");
+					if (!handle) {
+						std::cerr << "Cannot load plugin: " << GetLastError() << std::endl;
+						continue;
+					}
 
-				if (!createPlugin || !destroyPlugin) {
-					std::cerr << "Cannot load functions 'create' or 'destroy': " << GetLastError() << std::endl;
-					FreeLibrary(handle);
-					continue;
-				}
+					// Load the create and destroy functions
+					CreatePlugin createPlugin = (CreatePlugin)GetProcAddress(handle, "create");
+					DestroyPlugin destroyPlugin = (DestroyPlugin)GetProcAddress(handle, "destroy");
 
-				// Create and store the plugin
-				IPlugin* plugin = createPlugin(ImGui::GetCurrentContext());
-				
-				if (plugin) {
-					plugins.push_back({ handle, plugin, destroyPlugin });
-				}
-				else {
-					FreeLibrary(handle);
+					if (!createPlugin || !destroyPlugin) {
+						std::cerr << "Cannot load functions 'create' or 'destroy': " << GetLastError() << std::endl;
+						FreeLibrary(handle);
+						continue;
+					}
+
+					// Create and store the plugin
+					IPlugin* plugin = createPlugin(ImGui::GetCurrentContext());
+
+					if (plugin) {
+						plugins.push_back({ handle, plugin, destroyPlugin });
+					}
+					else {
+						FreeLibrary(handle);
+					}
 				}
 			}
 		}
-	}
 
-	void unloadPlugins(std::vector<PluginHandle>& plugins) {
-		for (auto& pluginHandle : plugins) {
-			pluginHandle.destroy(pluginHandle.plugin);
-			FreeLibrary(pluginHandle.handle);
+		void unloadPlugins(std::vector<PluginHandle>& plugins) {
+			for (auto& pluginHandle : plugins) {
+				pluginHandle.destroy(pluginHandle.plugin);
+				FreeLibrary(pluginHandle.handle);
+			}
+			plugins.clear();
 		}
-		plugins.clear();
-	}
 
-	void setRelativeCurrentPath() {
-		std::filesystem::path sourceFilePath(__FILE__);
-		std::filesystem::path sourceDir = sourceFilePath.parent_path();
-		std::filesystem::current_path(sourceDir);
-	}
-};
+		void setRelativeCurrentPath() {
+			std::filesystem::path sourceFilePath(__FILE__);
+			std::filesystem::path sourceDir = sourceFilePath.parent_path();
+			std::filesystem::current_path(sourceDir);
+		}
+	};
+}

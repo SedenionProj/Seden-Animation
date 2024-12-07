@@ -5,7 +5,10 @@
 
 #include "src/plugin_api/IPlugin.h"
 
-class Theme : public IPlugin {
-public:
-	virtual void select() = 0;
-};
+namespace Seden {
+
+	class Theme : public IPlugin {
+	public:
+		virtual void select() = 0;
+	};
+}

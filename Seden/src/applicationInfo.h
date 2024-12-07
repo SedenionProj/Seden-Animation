@@ -3,41 +3,44 @@
 #include "src/plugin_api/GUIwindow.h"
 #include "src/ressource_manager/pluginSystem.h"
 
-class AppInfo {
-public:
-	void addScene(const std::shared_ptr<Scene> scene) {
-		scenes.push_back(scene);
-		currentScene = scene;
-	}
+namespace Seden {
 
-	void addWindows(GuiWindow* windows) {
-		guiWindows.push_back(windows);
-	}
+	class AppInfo {
+	public:
+		void addScene(const std::shared_ptr<Scene> scene) {
+			scenes.push_back(scene);
+			currentScene = scene;
+		}
 
-	std::vector<GuiWindow*>& getWindows() {
-		return guiWindows;
-	}
+		void addWindows(GuiWindow* windows) {
+			guiWindows.push_back(windows);
+		}
 
-	std::vector<std::shared_ptr<Scene>>& getScenes() {
-		return scenes;
-	}
+		std::vector<GuiWindow*>& getWindows() {
+			return guiWindows;
+		}
 
-public:
-	std::shared_ptr<Scene> getCurrentScene() const {return currentScene;}
-	std::shared_ptr<Shape> getCurrentShape() const {return currentShape;}
-	std::shared_ptr<Shape> getShapeByIndex(int idx) const { return getCurrentScene()->getShapes()[idx]; }
+		std::vector<std::shared_ptr<Scene>>& getScenes() {
+			return scenes;
+		}
 
-	void setCurrentScene(std::shared_ptr<Scene> s) { currentScene = s; }
-	void setCurrentShape(std::shared_ptr<Shape> s) { currentShape = s; }
+	public:
+		std::shared_ptr<Scene> getCurrentScene() const { return currentScene; }
+		std::shared_ptr<Shape> getCurrentShape() const { return currentShape; }
+		std::shared_ptr<Shape> getShapeByIndex(int idx) const { return getCurrentScene()->getShapes()[idx]; }
 
-	int currentFrame = 0;
-	bool isContinuousRefresh = false;
+		void setCurrentScene(std::shared_ptr<Scene> s) { currentScene = s; }
+		void setCurrentShape(std::shared_ptr<Shape> s) { currentShape = s; }
 
-private:
-	std::vector<GuiWindow*> guiWindows;
-	std::vector<std::shared_ptr<Scene>> scenes;
+		int currentFrame = 0;
+		bool isContinuousRefresh = false;
 
-private:
-	std::shared_ptr<Scene> currentScene;
-	std::shared_ptr<Shape> currentShape;
-};
+	private:
+		std::vector<GuiWindow*> guiWindows;
+		std::vector<std::shared_ptr<Scene>> scenes;
+
+	private:
+		std::shared_ptr<Scene> currentScene;
+		std::shared_ptr<Shape> currentShape;
+	};
+}

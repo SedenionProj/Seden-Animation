@@ -7,76 +7,79 @@
 
 #include "src/logger.h"
 
-namespace fs = std::filesystem;
+namespace Seden {
 
-class FileSystem {
-public:
-	enum class Type {
-		FILE_PATH,
-		STRING_FILE
-	};
+	namespace fs = std::filesystem;
 
-	FileSystem() = default;
+	class FileSystem {
+	public:
+		enum class Type {
+			FILE_PATH,
+			STRING_FILE
+		};
 
-	FileSystem(const std::string& str, Type type) {
-		switch (type) {
-		case Type::FILE_PATH:
-			if (fs::exists(str) && fs::is_regular_file(str)) {
-				std::ifstream fileStream(str);
-				if (fileStream) {
-					std::stringstream buffer;
-					buffer << fileStream.rdbuf();
-					file = buffer.str();
+		FileSystem() = default;
+
+		FileSystem(const std::string& str, Type type) {
+			switch (type) {
+			case Type::FILE_PATH:
+				if (fs::exists(str) && fs::is_regular_file(str)) {
+					std::ifstream fileStream(str);
+					if (fileStream) {
+						std::stringstream buffer;
+						buffer << fileStream.rdbuf();
+						file = buffer.str();
+					}
+					else {
+						DEBUG_MSG("Failed to open file");
+					}
 				}
 				else {
-					DEBUG_MSG("Failed to open file");
+					DEBUG_MSG("File path does not exist or is not a regular file");
 				}
+				break;
+
+			case Type::STRING_FILE:
+				file = str;
+				break;
+
+			default:
+				DEBUG_MSG("Type not recognized");
+				break;
 			}
-			else {
-				DEBUG_MSG("File path does not exist or is not a regular file");
+		}
+
+		void replace(const std::string& toReplace, const std::string& newSubstring) {
+			size_t pos = file.find(toReplace);
+			if (pos != std::string::npos) {
+				file.replace(pos, toReplace.length(), newSubstring);
 			}
-			break;
-
-		case Type::STRING_FILE:
-			file = str;
-			break;
-
-		default:
-			DEBUG_MSG("Type not recognized");
-			break;
 		}
-	}
 
-	void replace(const std::string& toReplace, const std::string& newSubstring) {
-		size_t pos = file.find(toReplace);
-		if (pos != std::string::npos) {
-			file.replace(pos, toReplace.length(), newSubstring);
+		void addAfter(const std::string& targetLine, const std::string& newLine) {
+			size_t pos = file.find(targetLine);
+			if (pos != std::string::npos) {
+				pos += targetLine.length();
+
+				file.insert(pos, newLine);
+			}
 		}
-	}
 
-	void addAfter(const std::string& targetLine, const std::string& newLine) {
-		size_t pos = file.find(targetLine);
-		if (pos != std::string::npos) {
-			pos += targetLine.length();
-
-			file.insert(pos, newLine);
+		bool find(const std::string& str) {
+			if (file.find(str) != std::string::npos)
+				return true;
+			return false;
 		}
-	}
 
-	bool find(const std::string& str) {
-		if (file.find(str) != std::string::npos) 
-			return true;
-		return false;
-	}
+		void add(const std::string& str) {
+			file += str;
+		}
 
-	void add(const std::string& str ) {
-		file += str;
-	}
+		std::string& getFile() {
+			return file;
+		}
 
-	std::string& getFile() {
-		return file;
-	}
-
-private:
-	std::string file;
-};
+	private:
+		std::string file;
+	};
+}

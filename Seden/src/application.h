@@ -7,44 +7,48 @@
 #include "src/ressource_manager/pluginSystem.h"
 #include "src/default_Items/defaultWindows.h"
 
-PluginSystem pluginSystem;
 
-class Application {
-public:
-	void start() {
-		appInfo.addScene(std::make_shared<Scene>(appInfo));
-		pluginSystem.setRelativeCurrentPath();
 
-		//std::vector<PluginHandle> windowPlugins;
-		//pluginSystem.loadPlugins("./plugin_api", windowPlugins);
-		//
-		//for(auto& win : windowPlugins)
-		//	appInfo.addWindows(static_cast<GuiWindow*>(win.plugin));
-		appInfo.addWindows(new CompositionWin(appInfo));
-		appInfo.addWindows(new PrimitivesWin(appInfo));
-		appInfo.addWindows(new EffectsWin(appInfo));
-		appInfo.addWindows(new Timeline(appInfo));
-		appInfo.addWindows(new TopBar(appInfo));
+namespace Seden {
+	PluginSystem pluginSystem;
 
-		while (window.isRunning()) {
-			renderer.beginFrame();
-			renderer.drawFrame();
-			renderer.endFrame();
+	class Application {
+	public:
+		void start() {
+			appInfo.addScene(std::make_shared<Scene>(appInfo));
+			pluginSystem.setRelativeCurrentPath();
+
+			//std::vector<PluginHandle> windowPlugins;
+			//pluginSystem.loadPlugins("./plugin_api", windowPlugins);
+			//
+			//for(auto& win : windowPlugins)
+			//	appInfo.addWindows(static_cast<GuiWindow*>(win.plugin));
+			appInfo.addWindows(new CompositionWin(appInfo));
+			appInfo.addWindows(new PrimitivesWin(appInfo));
+			appInfo.addWindows(new EffectsWin(appInfo));
+			appInfo.addWindows(new Timeline(appInfo));
+			appInfo.addWindows(new TopBar(appInfo));
+
+			while (window.isRunning()) {
+				renderer.beginFrame();
+				renderer.drawFrame();
+				renderer.endFrame();
+			}
+
+			//pluginSystem.unloadPlugins(windowPlugins);
+			glfwTerminate();
 		}
 
-		//pluginSystem.unloadPlugins(windowPlugins);
-		glfwTerminate();
-	}
 
 
+		~Application() {
 
-	~Application() {
-		
-	}
+		}
 
-private:
-	uint32_t width = 1280, height = 720;
-	Window window{ width, height};
-	AppInfo appInfo{};
-	Renderer renderer{ window,appInfo };
-};
+	private:
+		uint32_t width = 1280, height = 720;
+		Window window{ width, height };
+		AppInfo appInfo{};
+		Renderer renderer{ window,appInfo };
+	};
+}
