@@ -9,6 +9,8 @@ namespace Seden {
 
 	class Shape {
 	public:
+		Shape(std::shared_ptr<Scene> scene) : m_scene(scene) {}
+
 		void setName(const std::string& name) { m_name = name; }
 
 		std::string& getName() { return m_name; }
@@ -29,7 +31,8 @@ namespace Seden {
 		int mFrameStart = 0, mFrameEnd = 10;
 		bool mExpanded;
 		int instanceCount = 1;
-	private:
+	protected:
+		std::shared_ptr<Scene> m_scene;
 		std::string m_name = "shape";
 		std::vector<std::shared_ptr<Effect>> effects;
 	};

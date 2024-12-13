@@ -5,11 +5,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "src/plugin_api/shape.h"
 #include "src/logger.h"
 
 namespace Seden {
 	class AppInfo;
+	class Shape;
 
 	struct ViewportInfo {
 		enum Projection {
@@ -59,12 +59,14 @@ namespace Seden {
 
 		void draw();
 
-		void createFramebuffer();
-
 		ViewportInfo viewportInfo;
+
+		//temp
 		GLuint textureColorbuffer;
 		GLuint framebuffer;
 	private:
+
+		void createFramebuffer();
 
 		std::vector<std::shared_ptr<Shape>> shapes;
 

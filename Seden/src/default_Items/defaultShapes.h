@@ -6,13 +6,14 @@
 #include "src/plugin_api/shape.h"
 #include "src/default_Items/defaultEffects.h"
 #include "src/api/buffer.h"
+#include "src/scene.h"
 
 namespace Seden {
 
 	class Quad : public Shape {
 	public:
-		Quad(int id) {
-			setName(std::to_string(id));
+		Quad(std::shared_ptr<Scene> scene) : Shape(scene) {
+			setName("Quad");
 			shader.createShader(baseVertexShader, baseFragmentShader.c_str());
 
 			addEffect(std::make_shared<Transform>());
@@ -89,8 +90,8 @@ void main(){
 
 	class Text : public Shape {
 	public:
-		Text(int id) {
-			setName(std::to_string(id));
+		Text(std::shared_ptr<Scene> scene) : Shape(scene) {
+			setName("Text");
 			shader.createShader(baseVertexShaderText, baseFragmentShaderText.c_str());
 
 			addEffect(std::make_shared<Transform>());
@@ -112,9 +113,9 @@ void main(){
 		}
 
 		void reloadText() {
-			// Load font data once
+
 			unsigned char* ttf_buffer = (unsigned char*)malloc(1 << 20);
-			unsigned char temp_bitmap[512 * 512];
+			unsigned char* temp_bitmap = (unsigned char*)malloc(texResolution * texResolution);
 
 			FILE* fontFile = fopen(fontPath.string().c_str(), "rb");
 			if (!fontFile) {
@@ -124,13 +125,14 @@ void main(){
 			fread(ttf_buffer, 1, 1 << 20, fontFile);
 			fclose(fontFile);
 
-			stbtt_BakeFontBitmap(ttf_buffer, 0, 32.0, temp_bitmap, 512, 512, 32, 96, cdata);
+			stbtt_BakeFontBitmap(ttf_buffer, 0, 64, temp_bitmap, texResolution, texResolution, 32, 96, cdata);
 			free(ttf_buffer);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 			glGenTextures(1, &ftex);
 			glBindTexture(GL_TEXTURE_2D, ftex);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, temp_bitmap);
-
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, texResolution, texResolution, 0, GL_RED, GL_UNSIGNED_BYTE, temp_bitmap);
+			free(temp_bitmap);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		}
 
@@ -141,12 +143,22 @@ void main(){
 
 			glBindVertexArray(quadVAO);
 			quadIBO.bind();
-			glDrawElementsInstanced(GL_TRIANGLES,quadIBO.getCount(), GL_UNSIGNED_INT,0, instanceCount);
+			glDrawElementsInstanced(GL_TRIANGLES, quadIBO.getCount(), GL_UNSIGNED_INT, 0, instanceCount);
 		}
 
 		void drawGui() override {
 			ImGui::Text("Text Window");
-			if (ImGui::InputText("Text", &text)) {
+			ImVec2 wsize = ImGui::GetWindowSize();
+			wsize.x -= 10;
+			if (ImGui::DragFloat("line space", &lineSpace)) {
+				createText(0.0f, 0.0f, text.data());
+			}
+
+			if (ImGui::DragInt("Resolution", &texResolution, 1,0, 2048)) {
+				createText(0.0f, 0.0f, text.data());
+			}
+
+			if (ImGui::InputTextMultiline("##", &text, wsize)) {
 				createText(0.0f, 0.0f, text.data());
 			}
 
@@ -156,33 +168,49 @@ void main(){
 			}
 		}
 
-		void createQuad(const stbtt_aligned_quad& q, uint32_t index) {
+		void createQuad(const stbtt_aligned_quad& q, glm::vec2 pos, uint32_t index) {
 			Vertex v[4];
-			v[0].pos =		 { q.x0, q.y0 };
-			v[0].texCoords = { q.s0, q.t0 };
 
-			v[1].pos =       { q.x1, q.y0 };
-			v[1].texCoords = { q.s1, q.t0 };
+			v[0].pos = glm::vec2(q.x0, q.y0) / scale + pos;
+			v[0].texCoords = glm::vec2(q.s0, q.t0);
 
-			v[2].pos =		 { q.x1, q.y1 };
-			v[2].texCoords = { q.s1, q.t1 };
+			v[1].pos = glm::vec2(q.x1, q.y0) / scale + pos;
+			v[1].texCoords = glm::vec2(q.s1, q.t0);
 
-			v[3].pos =		 { q.x0, q.y1 };
-			v[3].texCoords = { q.s0, q.t1 };
+			v[2].pos = glm::vec2(q.x1, q.y1) / scale + pos;
+			v[2].texCoords = glm::vec2(q.s1, q.t1);
 
-			quadVBO.changeData(4 * sizeof(Vertex), index * 4 * sizeof(Vertex),(void*)v);
+			v[3].pos = glm::vec2(q.x0, q.y1) / scale + pos;
+			v[3].texCoords = glm::vec2(q.s0, q.t1);
+
+			//DEBUG_MSG("%f %f %f %f", q.x0, q.x1, q.y0, q.y1);
+
+			quadVBO.changeData(4 * sizeof(Vertex), index * 4 * sizeof(Vertex), (void*)v);
 		}
 
 		void createText(float x, float y, char* letter) {
 			reloadText();
+
 			quadVBO.setData(text.length() * 4 * sizeof(Vertex));
 			quadIBO.setQuadLayout(text.length());
 			uint32_t i = 0;
+			float lineSkip = 0;
+			float center = 0;
+			stbtt_aligned_quad q;
 			while (*letter) {
-				if (*letter >= 32 && *letter < 128) {
-					stbtt_aligned_quad q;
-					stbtt_GetBakedQuad(cdata, 512, 512, *letter - 32, &x, &y, &q, 1);
-					createQuad(q, i++);
+				if (*letter == '\n') {
+					lineSkip += lineSpace;
+					center = x;
+
+					char zeroData[4 * sizeof(Vertex)] = { 0 };
+					quadVBO.changeData(4 * sizeof(Vertex), i++ * 4 * sizeof(Vertex), (void*)zeroData);
+
+				} else if (*letter >= 32 && *letter < 128) {
+					stbtt_GetBakedQuad(cdata, texResolution, texResolution, *letter - 32, &x, &y, &q, 1);
+					createQuad(q, glm::vec2(-center / scale, lineSkip / scale), i++);
+				} else {
+					stbtt_GetBakedQuad(cdata, texResolution, texResolution, 127-32, &x, &y, &q, 1);
+					createQuad(q, glm::vec2(-center / scale, lineSkip / scale), i++);
 				}
 				letter++;
 			}
@@ -217,6 +245,9 @@ void main(){
 
 		std::string text = "Text";
 		std::filesystem::path fontPath = "c:/windows/fonts/times.ttf";
+		float scale = 100;
+		float lineSpace = 30;
+		int texResolution = 2046;
 
 		stbtt_bakedchar cdata[96]; // ASCII 32..126
 		GLuint ftex = 0;

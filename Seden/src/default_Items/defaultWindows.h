@@ -45,11 +45,11 @@ namespace Seden {
 			ImGui::Begin("Primitives");
 			if (ImGui::Button("add square")) {
 				auto scene = m_appInfo.getCurrentScene();
-				scene->addShape(std::make_shared<Quad>(rand()));
+				scene->addShape(std::make_shared<Quad>(scene));
 			};
 			if (ImGui::Button("add text")) {
 				auto scene = m_appInfo.getCurrentScene();
-				scene->addShape(std::make_shared<Text>(rand()));
+				scene->addShape(std::make_shared<Text>(scene));
 			};
 			ImGui::End();
 		}

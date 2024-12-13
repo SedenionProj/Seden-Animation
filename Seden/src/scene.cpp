@@ -1,5 +1,6 @@
 #include "src/scene.h"
 #include "src/applicationInfo.h"
+#include "src/plugin_api/shape.h"
 
 namespace Seden {
 
