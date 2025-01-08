@@ -10,14 +10,15 @@ file(GLOB_RECURSE SEDEN_SOURCE
 	Seden/src/*.cpp
 )
 
-add_executable (seden_exe ${SEDEN_SOURCE})
+add_library (seden_lib ${SEDEN_SOURCE})
 
-target_include_directories (seden_exe PUBLIC
+target_include_directories (seden_lib PUBLIC
 	Seden
 )
 
-target_include_directories (seden_exe PUBLIC
+target_include_directories (seden_lib PUBLIC
 	${STB_INCLUDE}
+	${ENTT_INCLUDE}
 	${GLFW_INCLUDE}
 	${GLAD_INCLUDE}
 	${GLM_INCLUDE}
@@ -26,9 +27,21 @@ target_include_directories (seden_exe PUBLIC
 	${IMGUI_INCLUDE}/misc/cpp
 	${IMGUIZMO_INCLUDE}
 )
-target_link_libraries (seden_exe PUBLIC 
+target_link_libraries (seden_lib PUBLIC 
 	glfw
 	glad
 	imgui
 	imguizmo
+)
+
+# testApp
+
+file(GLOB_RECURSE TESTAPP_SOURCE
+	testApp/*.cpp
+)
+
+add_executable (testApp ${TESTAPP_SOURCE})
+
+target_link_libraries (testApp PRIVATE
+	seden_lib
 )

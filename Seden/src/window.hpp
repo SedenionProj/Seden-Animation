@@ -4,7 +4,7 @@
 namespace Seden {
 	class Window {
 	public:
-		Window(uint32_t width = 1280, uint32_t height = 1080, const char* name = "application") {
+		Window(uint32_t width = 1280, uint32_t height = 720, const char* name = "application") {
 			glfwInit();
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

@@ -14,9 +14,6 @@
 [submodule "Seden/vendor/imguizmo"]
 	path = Seden/vendor/imguizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
-[submodule "Seden/src/vendor/entt"]
-	path = Seden/src/vendor/entt
-	url = https://github.com/skypjack/entt.git
 [submodule "Seden/vendor/entt"]
 	path = Seden/vendor/entt
 	url = https://github.com/skypjack/entt.git
