@@ -40,7 +40,7 @@ namespace Seden {
 	public: 
 		Quad(Scene& scene) : Object(scene) {
 			add<Transform>();
-			//add<PolygonMesh>();
+			add<PolygonMesh>();
 		}
 	};
 }

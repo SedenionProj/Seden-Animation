@@ -4,16 +4,17 @@
 namespace Seden {
 	void Scene::wait(uint32_t frames) {
 		for (uint32_t i = 0; i < frames; i++) {
-			/*
-			renderer::draw();
-			*/
+			m_renderer.beginFrame();
+			update();
+			m_renderer.endFrame();
+			
 		}
 	}
 	void Scene::update() {
 		for (auto entity : m_registry.view<PolygonMesh>()) {
-			/*
-			Renderer::drawPolygonMesh(transform, mesh);
-			*/
+			
+			m_renderer.drawPolygonMesh(m_registry.get<Transform>(entity), m_registry.get<PolygonMesh>(entity));
+			
 		}
 	}
 }

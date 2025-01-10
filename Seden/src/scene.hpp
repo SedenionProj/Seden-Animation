@@ -6,7 +6,6 @@ namespace Seden {
 	class Scene {
 	public:
 		Scene() {
-			Renderer::init();
 		}
 
 		void wait(uint32_t frames);
@@ -20,5 +19,6 @@ namespace Seden {
 
 	private:
 		entt::registry m_registry;
+		Renderer m_renderer;
 	};
 }

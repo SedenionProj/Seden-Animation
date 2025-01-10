@@ -1,3 +1,5 @@
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "src/application.hpp"
 #include "src/scene.hpp"
 #include "src/object.hpp"
@@ -9,9 +11,6 @@ public:
 		using namespace Seden;
 
 		auto o = Quad::create(scene);
-
-		
-
 
 		scene.wait(1000);
 	}
