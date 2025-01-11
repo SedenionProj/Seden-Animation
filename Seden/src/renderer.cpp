@@ -3,22 +3,41 @@
 
 #include "src/renderer.hpp"
 #include "src/components.hpp"
+#include "src/logger.h"
 
 #define MAX_POLYGON_MESH 100000
 
 namespace Seden {
+	static void GLAPIENTRY MessageCallback(GLenum source,
+			GLenum type,
+			GLuint id,
+			GLenum severity,
+			GLsizei length,
+			const GLchar* message,
+			const void* userParam)
+	{
+		fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+			(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+			type, severity, message);
+	}
+
 	Renderer::Renderer()
 	{
 		gladLoadGL();
+		
+#if defined(DEBUG) || defined(_DEBUG)
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(MessageCallback, 0);
+#endif
 
-		polygonMeshVBO = new VertexBuffer(0, nullptr);
+		polygonMeshVBO = new VertexBuffer();
 		polygonMeshVAO = new VertexArray();
 		polygonMeshVAO->addVertexBuffer(*polygonMeshVBO, VertexArrayLayout({
 			3, // position
-			}));
-
-		polygonMeshIBO = new IndexBuffer();
-		polygonMeshIBO->setQuadLayout(1);
+			3, // color
+		}));
+		shader = new Shader();
+		shader->createShader(baseVertexShader, baseFragmentShader);
 	}
 
 	Renderer::~Renderer()
@@ -28,7 +47,7 @@ namespace Seden {
 	void Renderer::beginFrame()
 	{
 		glfwPollEvents();
-		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+		glClearColor(0.1f,0.1f,0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
@@ -40,9 +59,10 @@ namespace Seden {
 	void Renderer::drawPolygonMesh(const Transform& trasform, const PolygonMesh& mesh)
 	{
 		// todo batching
+		shader->Bind();
 		polygonMeshVBO->setData(mesh.getsize(), mesh.getdata());
 		polygonMeshVAO->bind();
-		polygonMeshIBO->bind();
-		glDrawElements(GL_TRIANGLES, polygonMeshIBO->getCount(), GL_UNSIGNED_INT, nullptr);
+
+		glDrawArrays(GL_TRIANGLE_FAN, 0, mesh.getVertexCount());
 	}
 }

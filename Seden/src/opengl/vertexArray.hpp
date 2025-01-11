@@ -7,6 +7,7 @@ namespace Seden {
 	public:
 		VertexArrayLayout(std::initializer_list<float> vertexAttribs)
 			: vertexAttribs(vertexAttribs) {}
+		// todo: data types support
 		const std::vector<float>& getLayout() const { return vertexAttribs; }
 	private:
 		std::vector<float> vertexAttribs;
