@@ -20,7 +20,7 @@ namespace Seden {
 		}
 
 		template<typename T, typename I>
-		T& add(std::initializer_list<I> il) {
+		T& add(const std::initializer_list<I>& il) {
 			return m_scene.getRegistry().emplace<T>(m_entity, il);
 		}
 
@@ -63,7 +63,8 @@ namespace Seden {
 
 		Quad(Scene& scene) : Object(scene) {
 			add<Transform>(glm::mat4(1));
-			add<PolygonMesh, PolygonMesh::Vertex>({ { glm::vec3(-0.5f, -0.5f,1) }, 
+			add<PolygonMesh, PolygonMesh::Vertex>({ 
+				{ glm::vec3(-0.5f, -0.5f,1) }, 
 				{ glm::vec3(0.5f, -0.5f,1) },
 				{ glm::vec3(0.5f, 0.5f,1)},
 				{ glm::vec3(-0.5f, 0.5f,1) }

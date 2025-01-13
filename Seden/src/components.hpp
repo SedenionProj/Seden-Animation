@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <glm/gtc/quaternion.hpp>
 
 #include "src/logger.h"
 
@@ -10,6 +11,24 @@ namespace Seden {
 	public:
 		Transform() = default;
 		Transform(const glm::mat4& transform) : m_transform(transform) {}
+
+		operator glm::mat4&() {
+			return m_transform;
+		}
+
+		glm::vec3 getPosition() const {
+			return glm::vec3(m_transform[3]);
+		}
+
+		glm::quat GetRotation() const {
+			return glm::quat_cast(glm::mat3(m_transform));
+		}
+
+		glm::mat4& getTransform() {
+			return m_transform;
+		}
+
+	private:
 		glm::mat4 m_transform = glm::mat4(1);
 	};
 
@@ -42,6 +61,10 @@ namespace Seden {
 			}
 		}
 
+		Vertex& getVertex(uint32_t index) {
+			return m_vertices[index];
+		}
+
 		size_t getsize() const {
 			return m_vertices.size() * sizeof(Vertex);
 		}
@@ -54,6 +77,13 @@ namespace Seden {
 			return m_vertices.size();
 		}
 		
+        std::vector<Vertex>& getVertices() {
+            return m_vertices;
+        }
+
+        const std::vector<Vertex>& getVertices() const {
+            return m_vertices;
+        }
 	private:
 		std::vector<Vertex> m_vertices;
 	};

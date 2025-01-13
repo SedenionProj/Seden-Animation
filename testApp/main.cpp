@@ -5,6 +5,9 @@
 #include "src/scene.hpp"
 #include "src/object.hpp"
 #include "src/components.hpp"
+#include "src/animation/curve.hpp"
+
+// todo: transform, animation, camera, batching
 
 class TestApp : public Seden::Application {
 public:
@@ -15,18 +18,20 @@ public:
 		o->get<PolygonMesh>().setColor({ 1,0.7,1 });
 		o->get<PolygonMesh>().setColorGradient({ {1,0,0}, {0,1,0}, {0,0,1} });
 
-		auto poly = Polygon::create(scene, {
-			{{-0.5f, -0.5f,1} , {0,0,1}},
-			{{0.5f, -0.5f,1} , {0,1,0}},
-			{{0.5f, 0.5f,1}, {1,0,1}},
-			{{0,1,0}, {1,0,0}},
-			{{-0.5f, 0.5f,1} , {1,1,0}}
-			});
+		//auto poly = Polygon::create(scene, {
+		//	{{-0.5f, -0.5f,1} , {0,0,1}}, 
+		//	{{0.5f, -0.5f,1} , {0,1,0}},
+		//	{{0.5f, 0.5f,1}, {1,0,1}},
+		//	{{0,1,0}, {1,0,0}},
+		//	{{-0.5f, 0.5f,1} , {1,1,0}}
+		//	});
+		//
+		//poly->get<PolygonMesh>().setColor({1,0,0});
 
-		poly->get<PolygonMesh>().setColor({1,0,0});
-		
-
-		scene.wait(10000);
+		scene.animate(&o->get<Transform>().getTransform(),
+			glm::translate(o->get<Transform>().getTransform(), glm::vec3(1.,1.,0)),
+			1,EaseInOut(0.1));
+		scene.wait(1);
 	}
 
 private:

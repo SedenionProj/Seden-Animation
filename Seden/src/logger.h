@@ -42,10 +42,13 @@
 			case GL_CONTEXT_LOST:\
 				DEBUG_ERROR("GL_CONTEXT_LOST");\
 				break;\
-			case GL_TABLE_TOO_LARGE:\
-				DEBUG_ERROR("GL_TABLE_TOO_LARGE");\
-				break;\
 			default:\
 				break;\
 		}
+#else
+	#define DEBUG_ERROR(Message, ...)
+	#define DEBUG_MSG(Message, ...)
+	#define DEBUG_WARNING(Message, ...)
+	#define DEBUG_ASSERT(x, ...)
+	#define DEBUG_CHECK_OPENGL()
 #endif

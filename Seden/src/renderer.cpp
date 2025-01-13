@@ -56,13 +56,17 @@ namespace Seden {
 		glfwSwapBuffers(glfwGetCurrentContext());
 	}
 
-	void Renderer::drawPolygonMesh(const Transform& trasform, const PolygonMesh& mesh)
+	void Renderer::drawPolygonMesh(Transform& transform, PolygonMesh& mesh)
 	{
 		// todo batching
-		shader->Bind();
-		polygonMeshVBO->setData(mesh.getsize(), mesh.getdata());
-		polygonMeshVAO->bind();
+		std::vector<PolygonMesh::Vertex> transformMesh;
+		for (auto& vertex : mesh.getVertices()) {
+			transformMesh.emplace_back(PolygonMesh::Vertex(glm::vec3(transform.getTransform() * glm::vec4(vertex.position, 1)), vertex.color));
+		}
 
+		shader->Bind();
+		polygonMeshVBO->setData(mesh.getsize(), transformMesh.data());
+		polygonMeshVAO->bind();
 		glDrawArrays(GL_TRIANGLE_FAN, 0, mesh.getVertexCount());
 	}
 }

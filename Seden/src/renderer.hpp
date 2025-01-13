@@ -14,7 +14,7 @@ namespace Seden {
 		void beginFrame();
 		void endFrame();
 
-		void drawPolygonMesh(const Transform& trasform, const PolygonMesh& mesh);
+		void drawPolygonMesh(Transform& transform, PolygonMesh& mesh);
 
 	private:
 		VertexBuffer* polygonMeshVBO;
