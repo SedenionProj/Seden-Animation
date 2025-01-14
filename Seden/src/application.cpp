@@ -6,6 +6,9 @@ namespace Seden{
 	}
 
 	void Application::start() {
-		animation();
+		std::jthread anim(std::bind(&Application::animation, this));
+		scene.startAnimationLoop();
+		anim.join();
+		//loop.detach();
 	}
 }

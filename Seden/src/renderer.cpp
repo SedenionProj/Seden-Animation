@@ -21,7 +21,8 @@ namespace Seden {
 			type, severity, message);
 	}
 
-	Renderer::Renderer()
+	Renderer::Renderer(Window& window)
+		:m_window(window)
 	{
 		gladLoadGL();
 		
@@ -53,7 +54,7 @@ namespace Seden {
 
 	void Renderer::endFrame()
 	{
-		glfwSwapBuffers(glfwGetCurrentContext());
+		glfwSwapBuffers(m_window.getWindowPtr());
 	}
 
 	void Renderer::drawPolygonMesh(Transform& transform, PolygonMesh& mesh)

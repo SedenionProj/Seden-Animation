@@ -3,34 +3,89 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <glm/gtc/quaternion.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
+#include <glm/gtc/matrix_transform.hpp>
 #include "src/logger.h"
 
 namespace Seden {
-	class Transform {
-	public:
-		Transform() = default;
-		Transform(const glm::mat4& transform) : m_transform(transform) {}
+   class Transform {
+    public:
+        Transform() = default;
+        Transform(const glm::mat4& transform) : m_transform(transform) {}
 
-		operator glm::mat4&() {
-			return m_transform;
-		}
+        operator glm::mat4& () {
+            return m_transform;
+        }
 
-		glm::vec3 getPosition() const {
-			return glm::vec3(m_transform[3]);
-		}
+        operator const glm::mat4& () const {
+            return m_transform;
+        }
 
-		glm::quat GetRotation() const {
-			return glm::quat_cast(glm::mat3(m_transform));
-		}
+        // Getters
+        glm::vec3 getPosition() const {
+            return glm::vec3(m_transform[3]);
+        }
 
-		glm::mat4& getTransform() {
-			return m_transform;
-		}
+        glm::quat getRotation() const {
+            return glm::quat_cast(glm::mat3(m_transform));
+        }
 
-	private:
-		glm::mat4 m_transform = glm::mat4(1);
-	};
+        glm::vec3 getScale() const {
+            return glm::vec3(
+                glm::length(glm::vec3(m_transform[0])),
+                glm::length(glm::vec3(m_transform[1])),
+                glm::length(glm::vec3(m_transform[2]))
+            );
+        }
+
+        glm::mat4& getTransform() {
+            return m_transform;
+        }
+
+        const glm::mat4& getTransform() const {
+            return m_transform;
+        }
+
+        // Setters
+        void setPosition(const glm::vec3& position) {
+            m_transform[3] = glm::vec4(position, 1.0f);
+        }
+
+        void setRotation(const glm::quat& rotation) {
+            glm::vec3 scale = getScale();
+            glm::mat4 rotMatrix = glm::toMat4(rotation);
+
+            m_transform[0] = glm::vec4(glm::normalize(glm::vec3(rotMatrix[0])) * scale.x, 0.0f);
+            m_transform[1] = glm::vec4(glm::normalize(glm::vec3(rotMatrix[1])) * scale.y, 0.0f);
+            m_transform[2] = glm::vec4(glm::normalize(glm::vec3(rotMatrix[2])) * scale.z, 0.0f);
+        }
+
+        void setScale(const glm::vec3& scale) {
+            glm::vec3 currentScale = getScale();
+            if (currentScale.x != 0) m_transform[0] *= scale.x / currentScale.x;
+            if (currentScale.y != 0) m_transform[1] *= scale.y / currentScale.y;
+            if (currentScale.z != 0) m_transform[2] *= scale.z / currentScale.z;
+        }
+
+        // Utility functions
+        void translate(const glm::vec3& offset) {
+            m_transform = glm::translate(m_transform, offset);
+        }
+
+        void rotate(const glm::quat& rotation) {
+            m_transform = m_transform * glm::toMat4(rotation);
+        }
+
+        void scale(const glm::vec3& factor) {
+            m_transform = glm::scale(m_transform, factor);
+        }
+
+    private:
+        glm::mat4 m_transform = glm::mat4(1.0f);
+    };
+
 
 	class PolygonMesh {
 	public:
@@ -46,6 +101,7 @@ namespace Seden {
 			}
 		}
 
+        // Setters
 		void setColor(const glm::vec3& color) {
 			for (auto& vertex : m_vertices) {
 				vertex.color = color;
@@ -60,6 +116,8 @@ namespace Seden {
 				m_vertices[i].color = *(gradIt++);
 			}
 		}
+
+        // Getters
 
 		Vertex& getVertex(uint32_t index) {
 			return m_vertices[index];

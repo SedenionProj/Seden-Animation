@@ -1,21 +1,24 @@
 #pragma once
 #include <entt/entt.hpp>
 #include <type_traits>
+#include <thread>
 
 #include "src/renderer.hpp"
 #include "src/animation/curve.hpp"
 #include "src/animation/animation.hpp"
 #include "src/logger.h"
 #include "src/deltaTime.hpp"
+#include "src/window.hpp"
 
 namespace Seden {
 	class Scene {
 	public:
-		Scene() {
-		}
+		Scene(Window& window) : m_window(window) {}
+
+		void startAnimationLoop();
 
 		void wait(float seconds);
-		void animate(Animation& animation);
+		//void animate(const Animation& animation);
 
 		template<typename T>
 		void animate(T* variable, T to, float seconds, const Curve& curve);
@@ -29,7 +32,8 @@ namespace Seden {
 
 	private:
 		entt::registry m_registry;
-		Renderer m_renderer;
+		Window& m_window;
+		Renderer m_renderer{m_window};
 		DeltaTime dt;
 	};
 	

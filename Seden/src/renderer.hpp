@@ -3,12 +3,13 @@
 #include "src/opengl/vertexArray.hpp"
 #include "src/opengl/buffer.hpp"
 #include "src/opengl/shader.hpp"
+#include "src/window.hpp"
 
 namespace Seden {
 
 	class Renderer {
 	public:
-		Renderer();
+		Renderer(Window& window);
 		~Renderer();
 
 		void beginFrame();
@@ -20,5 +21,7 @@ namespace Seden {
 		VertexBuffer* polygonMeshVBO;
 		VertexArray* polygonMeshVAO;
 		Shader* shader;
+
+		Window& m_window;
 	};
 }

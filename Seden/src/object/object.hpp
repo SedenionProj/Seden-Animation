@@ -1,3 +1,4 @@
+#pragma once
 #include <entt/entt.hpp>
 #include <glm/matrix.hpp>
 #include "src/scene.hpp"

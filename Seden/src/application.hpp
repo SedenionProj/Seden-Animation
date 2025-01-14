@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "src/window.hpp"
+#include "src/scene.hpp"
 
 namespace Seden {
 	class Application {
@@ -10,9 +11,12 @@ namespace Seden {
 		virtual void animation() = 0;
 
 		~Application();
-
+	
 	private:
 		uint32_t m_width = 1280, m_height = 720;
-		Window window{ m_width, m_height, "application" };
+		Window m_window{ m_width, m_height, "application" };
+
+	public:
+		Scene scene{ m_window };
 	};
 }
