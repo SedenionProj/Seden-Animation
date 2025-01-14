@@ -2,6 +2,7 @@
 #include <entt/entt.hpp>
 #include <type_traits>
 #include <thread>
+#include <vector>
 
 #include "src/renderer.hpp"
 #include "src/animation/curve.hpp"
@@ -18,45 +19,26 @@ namespace Seden {
 		void startAnimationLoop();
 
 		void wait(float seconds);
-		//void animate(const Animation& animation);
 
 		template<typename T>
-		void animate(T* variable, T to, float seconds, const Curve& curve);
+		void animate(VariableAnimationInfo<T> anim);
 
-		entt::registry& getRegistry() {
-			return m_registry;
-		}
+		entt::registry& getRegistry() { return m_registry; }
+
 	private:
 		void draw();
-		float secondsToStep(float dt, float sec);
 
 	private:
 		entt::registry m_registry;
 		Window& m_window;
 		Renderer m_renderer{m_window};
-		DeltaTime dt;
-	};
-	
+		DeltaTime m_dt;
 
+		std::vector<std::unique_ptr<Animation>> m_animations;
+	};
 
 	template<typename T>
-	inline void Scene::animate(T* variable, T to, float seconds, const Curve& curve)
-	{
-		// todo: maybe, the function should use concepts
-		float step = secondsToStep(dt.getElapsedTime(), seconds);
-
-		T from = *variable;
-
-		for (float time = 0; time < 1.f; time += step) {
-			dt.reset();
-			float t = curve(time);
-			*variable = from * (1.f - t) + to * t;
-			m_renderer.beginFrame();
-			draw();
-			m_renderer.endFrame();
-			step = secondsToStep(dt.getElapsedTime(), seconds);
-		}
+	void Scene::animate(VariableAnimationInfo<T> anim) {
+		m_animations.push_back(std::make_unique<VariableAnimation<T>>(anim.var, anim.to, anim.curve, anim.time));
 	}
-
 }
-
