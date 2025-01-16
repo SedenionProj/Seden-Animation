@@ -2,15 +2,18 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <memory>
 #include <glm/gtc/quaternion.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
-
 #include <glm/gtc/matrix_transform.hpp>
+
 #include "src/logger.h"
 
 namespace Seden {
-   class Transform {
+    class Object;
+
+    class Transform {
     public:
         Transform() = default;
         Transform(const glm::mat4& transform) : m_transform(transform) {}
@@ -86,7 +89,6 @@ namespace Seden {
         glm::mat4 m_transform = glm::mat4(1.0f);
     };
 
-
 	class PolygonMesh {
 	public:
 		struct Vertex {
@@ -131,7 +133,7 @@ namespace Seden {
 			return m_vertices.data();
 		}
 
-		uint32_t getVertexCount() const {
+		size_t getVertexCount() const {
 			return m_vertices.size();
 		}
 		
@@ -145,4 +147,62 @@ namespace Seden {
 	private:
 		std::vector<Vertex> m_vertices;
 	};
+
+    class GroupObjects {
+    public:
+		
+		GroupObjects() = default;
+
+		explicit GroupObjects(std::vector<std::shared_ptr<Object>> objects)
+			: m_objects(std::move(objects)) {
+		}
+
+		GroupObjects(std::initializer_list<std::shared_ptr<Object>> objects)
+			: m_objects(objects) {
+		}
+
+		GroupObjects(GroupObjects&& other) noexcept
+			: m_objects(std::move(other.m_objects)) {
+		}
+
+		GroupObjects(const GroupObjects&) = delete;
+
+		void addObject(const std::shared_ptr<Object>& object) {
+			m_objects.push_back(object);
+		}
+
+		void removeObject(size_t index) {
+			if (index < m_objects.size()) {
+				m_objects.erase(m_objects.begin() + index);
+			}
+			else {
+				DEBUG_ERROR("Invalid index for removeObject\n");
+			}
+		}
+
+		std::shared_ptr<Object> getObject(size_t index) const {
+			if (index < m_objects.size()) {
+				return m_objects[index];
+			}
+			else {
+				DEBUG_ERROR("Invalid index for getObject\n");
+				return nullptr;
+			}
+		}
+
+		size_t size() const {
+			return m_objects.size();
+		}
+
+		void clear() {
+			m_objects.clear();
+		}
+
+		auto begin() { return m_objects.begin(); }
+		auto end() { return m_objects.end(); }
+		auto begin() const { return m_objects.begin(); }
+		auto end() const { return m_objects.end(); }
+    private:
+        std::vector<std::shared_ptr<Object>> m_objects;
+    };
 }

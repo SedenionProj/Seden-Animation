@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "src/renderer.hpp"
-#include "src/components.hpp"
+#include "src/object/components.hpp"
 #include "src/logger.h"
 
 #define MAX_POLYGON_MESH 100000

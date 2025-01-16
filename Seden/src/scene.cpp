@@ -7,6 +7,11 @@ namespace Seden {
 		std::this_thread::sleep_for(std::chrono::duration<float>(seconds));
 	}
 
+    void Scene::animate(FunctionAnimationInfo anim)
+    {
+        m_animations.push_back(std::make_unique<FunctionAnimation>(anim.anim, anim.curve, anim.time));
+    }
+
 	void Scene::startAnimationLoop()
 	{
         while (m_window.isRunning()) {

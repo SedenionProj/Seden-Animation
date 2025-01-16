@@ -1,5 +1,5 @@
 #pragma once
-#include "src/components.hpp"
+#include "src/object/components.hpp"
 #include "src/opengl/vertexArray.hpp"
 #include "src/opengl/buffer.hpp"
 #include "src/opengl/shader.hpp"

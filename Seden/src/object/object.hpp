@@ -2,7 +2,7 @@
 #include <entt/entt.hpp>
 #include <glm/matrix.hpp>
 #include "src/scene.hpp"
-#include "src/components.hpp"
+#include "src/object/components.hpp"
 
 namespace Seden {
 	class Object {
@@ -27,6 +27,7 @@ namespace Seden {
 
 		template<typename T>
 		T& get() {
+			// todo: maybe add a safety check, or add "getOrCreate" function
 			return m_scene.getRegistry().get<T>(m_entity);
 		}
 		template<typename... Args>
@@ -72,4 +73,6 @@ namespace Seden {
 				});
 		}
 	};
+
+
 }

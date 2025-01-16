@@ -6,8 +6,7 @@
 namespace Seden {
 	float Curve::operator()(float time) const
 	{
-		float t = get(time);
-		return t > 1.f ? 1.f : t;
+		return get(time);
 	}
 
 	EaseIn::EaseIn(float strength)
