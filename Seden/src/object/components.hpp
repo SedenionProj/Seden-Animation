@@ -205,4 +205,15 @@ namespace Seden {
     private:
         std::vector<std::shared_ptr<Object>> m_objects;
     };
+
+	class Perspective {
+	public:
+		Perspective(float aspectRatio)
+			: m_projection(glm::perspective(glm::radians(90.f), aspectRatio, 0.01f, 100.f)) {}
+
+		glm::mat4& get() { return m_projection; }
+
+	private:
+		glm::mat4 m_projection;
+	};
 }

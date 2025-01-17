@@ -9,8 +9,18 @@ namespace Seden {
 		m_from = m_transform.getPosition();
 	}
 
-	void MoveTo::update(float time)
+	void MoveTo::update(float time, float dt)
 	{
 		m_transform.setPosition(lerp(m_from, m_pos, time));
 	}
+
+	TranslateBy::TranslateBy(std::shared_ptr<Object> obj, const glm::vec3& vec)
+		: m_vec(vec), m_transform(obj->get<Transform>()) {}
+
+	void TranslateBy::update(float time, float dt)
+	{
+		m_transform.translate(m_vec * dt);
+	}
+
+	
 }

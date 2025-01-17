@@ -34,6 +34,7 @@ namespace Seden {
 
 	protected:
 		float t = 0;
+		float prev_f_t = 0;
 	};
 
 	template<typename T>
@@ -44,8 +45,13 @@ namespace Seden {
 			shiftStart(shift);
 		}
 
+		virtual ~VariableAnimation() {
+			delete m_curve;
+		}
+
 		void update(float dt) override {
-			t += secondsToStep(dt, m_time);
+			float step_dt = secondsToStep(dt, m_time);
+			t += step_dt;
 			if (t < 0) return;
 			if (t > 1) finish();
 			else at(t);
@@ -78,18 +84,21 @@ namespace Seden {
 
 		virtual ~FunctionAnimation(){
 			delete m_anim;
+			delete m_curve;
 		}
 
 		void update(float dt) override {
-			t += secondsToStep(dt, m_time);
+			float step_dt = secondsToStep(dt, m_time);
+			t += step_dt;
 			if (t < 0) return;
 			if (t > 1) finish();
-			else at(t);
+			else at(t, step_dt);
 		}
 
-		void at(float time) {
+		void at(float time, float step_dt) {
 			float f_t = m_curve->get(time);
-			m_anim->update(f_t);
+			m_anim->update(f_t, f_t- prev_f_t);
+			prev_f_t = f_t;
 		}
 
 		// todo: pause/resume/stop
@@ -97,7 +106,7 @@ namespace Seden {
 	private:
 		void finish() {
 			finished = true;
-			at(1.f);
+			at(1.f,0);
 		}
 
 	private:

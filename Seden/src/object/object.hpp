@@ -66,13 +66,35 @@ namespace Seden {
 		Quad(Scene& scene) : Object(scene) {
 			add<Transform>(glm::mat4(1));
 			add<PolygonMesh, PolygonMesh::Vertex>({ 
-				{ glm::vec3(-0.5f, -0.5f,1) }, 
-				{ glm::vec3(0.5f, -0.5f,1) },
-				{ glm::vec3(0.5f, 0.5f,1)},
-				{ glm::vec3(-0.5f, 0.5f,1) }
+				{ glm::vec3(-0.5f, -0.5f,0) }, 
+				{ glm::vec3(0.5f,  -0.5f,0) },
+				{ glm::vec3(0.5f,   0.5f,0) },
+				{ glm::vec3(-0.5f,  0.5f,0) }
 				});
 		}
 	};
 
+	class PerspectiveCamera : public Object {
+	public:
+		static std::shared_ptr<PerspectiveCamera> create(Scene& scene) {
+			return std::make_shared<PerspectiveCamera>(scene);
+		}
 
+		glm::mat4 getView() {
+			auto& t = get<Transform>();
+			glm::vec3 front = glm::normalize(glm::rotate(t.getRotation(), glm::vec3(0, 0, 1)));
+			glm::vec3 pos = t.getPosition();
+			return glm::lookAt(pos, pos + front, glm::vec3(0, 1, 0));
+		}
+
+		glm::mat4& getProjection() {
+			return get<Perspective>().get();
+		}
+
+		PerspectiveCamera(Scene& scene) : Object(scene) {
+			auto& t = add<Transform>(glm::mat4(1));
+			t.setPosition({ 0, 0, -2 });
+			add<Perspective>(16.f / 9.f);
+		}
+	};
 }

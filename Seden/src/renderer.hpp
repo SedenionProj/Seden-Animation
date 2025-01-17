@@ -6,11 +6,14 @@
 #include "src/window.hpp"
 
 namespace Seden {
+	class PerspectiveCamera;
 
 	class Renderer {
 	public:
 		Renderer(Window& window);
 		~Renderer();
+
+		void setCamera(std::shared_ptr<PerspectiveCamera> camera);
 
 		void beginFrame();
 		void endFrame();
@@ -18,6 +21,8 @@ namespace Seden {
 		void drawPolygonMesh(Transform& transform, PolygonMesh& mesh);
 
 	private:
+		std::shared_ptr<PerspectiveCamera> m_camera;
+
 		VertexBuffer* polygonMeshVBO;
 		VertexArray* polygonMeshVAO;
 		Shader* shader;

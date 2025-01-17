@@ -4,6 +4,7 @@
 #include "src/renderer.hpp"
 #include "src/object/components.hpp"
 #include "src/logger.h"
+#include "src/object/object.hpp"
 
 #define MAX_POLYGON_MESH 100000
 
@@ -45,6 +46,11 @@ namespace Seden {
 	{
 	}
 
+	void Renderer::setCamera(std::shared_ptr<PerspectiveCamera> camera)
+	{
+		m_camera = camera;
+	}
+
 	void Renderer::beginFrame()
 	{
 		glfwPollEvents();
@@ -66,6 +72,9 @@ namespace Seden {
 		}
 
 		shader->Bind();
+		shader->setMat4("view", m_camera->getView());
+		shader->setMat4("proj", m_camera->getProjection());
+
 		polygonMeshVBO->setData(mesh.getsize(), transformMesh.data());
 		polygonMeshVAO->bind();
 		glDrawArrays(GL_TRIANGLE_FAN, 0, mesh.getVertexCount());

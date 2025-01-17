@@ -38,6 +38,11 @@ namespace Seden {
         }
 	}
 
+    void Scene::setCamera(std::shared_ptr<PerspectiveCamera> camera)
+    {
+        m_renderer.setCamera(camera);
+    }
+
 	void Scene::draw() {
 		auto t = m_registry.view<PolygonMesh>();
 		for (auto entity : m_registry.view<PolygonMesh>()) {

@@ -12,11 +12,15 @@
 #include "src/window.hpp"
 
 namespace Seden {
+	class PerspectiveCamera;
+
 	class Scene {
 	public:
 		Scene(Window& window) : m_window(window) {}
 
 		void startAnimationLoop();
+
+		void setCamera(std::shared_ptr<PerspectiveCamera> camera);
 
 		void wait(float seconds);
 
@@ -52,7 +56,7 @@ namespace Seden {
 	{
 		float shift = 0;
 		for (std::shared_ptr<Object> o : objects) {
-			m_animations.push_back(std::make_unique<FunctionAnimation>(new Animator(o,std::forward<Args>(args)...), new EaseInOut(6), 2.f, shift));
+			m_animations.push_back(std::make_unique<FunctionAnimation>(new Animator(o,std::forward<Args>(args)...), new EaseInOut(6), 5.f, shift));
 			shift += 0.1;
 		}
 	}
