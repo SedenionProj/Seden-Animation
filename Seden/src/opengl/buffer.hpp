@@ -36,7 +36,7 @@ namespace Seden {
 
 		void setQuadLayout(const uint32_t quadNumber);
 
-		void data(uint32_t count, uint32_t* indices);
+		void setData(uint32_t count, uint32_t* indices);
 
 		void bind() const;
 

@@ -47,9 +47,16 @@ namespace Seden {
     }
 
 	void Scene::draw() {
-		auto t = m_registry.view<PolygonMesh>();
 		for (auto entity : m_registry.view<PolygonMesh>()) {
 			m_renderer.drawPolygonMesh(m_registry.get<Transform>(entity), m_registry.get<PolygonMesh>(entity));
 		}
+
+        /*
+        for (entity : polygonmesh){
+            m_renderer.drawPolygonMesh()
+        }
+        */
+
+        //drawPolygonMesh();
 	}
 }

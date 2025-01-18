@@ -45,13 +45,13 @@ namespace Seden {
 		Scene& m_scene;
 	};
 
-	class Polygon : public Object {
+	class ConvexPolygon : public Object {
 	public:
-		static std::shared_ptr<Polygon> create(Scene& scene, const std::initializer_list<PolygonMesh::Vertex> vertices) {
-			return std::make_shared<Polygon>(scene, vertices);
+		static std::shared_ptr<ConvexPolygon> create(Scene& scene, const std::initializer_list<PolygonMesh::Vertex> vertices) {
+			return std::make_shared<ConvexPolygon>(scene, vertices);
 		}
 
-		Polygon(Scene& scene, const std::initializer_list<PolygonMesh::Vertex> vertices) : Object(scene) {
+		ConvexPolygon(Scene& scene, const std::initializer_list<PolygonMesh::Vertex> vertices) : Object(scene) {
 			add<Transform>(glm::mat4(1));
 			add<PolygonMesh, PolygonMesh::Vertex>(vertices);
 		}

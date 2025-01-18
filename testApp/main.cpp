@@ -22,20 +22,21 @@ public:
 		scene.setCamera(cam);
 
 		auto o1 = Quad::create(scene);
-
-		//scene.animate<glm::vec3>({.var = &o1->get<PolygonMesh>().getVertex(0).position, .to = glm::vec3(0.1) , .curve = new EaseInOut(5), .time = 2.f});
-		//scene.animate<glm::vec3>({.var = &o1->get<PolygonMesh>().getVertex(0).position, .to = glm::vec3(0.1) , .curve = new EaseInOut(1), .time = 3.5f});
-		//scene.wait(0.5);
-		//scene.animate<glm::vec3>({.var = &o1->get<PolygonMesh>().getVertex(1).color, .to = glm::vec3(0,1,0)});
+		for (int i = 0; i < 500; i++) {
+			auto o2 = Quad::create(scene);
+			scene.animate({ .anim = new MoveTo(o2, glm::vec3(1, 0, 0)), .curve = new EaseInOut(5), .time = 1 });
+		}
+			
 
 		//scene.animGroup<TranslateBy>({ o1, o2, o3 }, glm::vec3(0., 0, -5));
 		//scene.animate({ .anim = new TranslateBy(o1, glm::vec3(1, 0, 0)), .curve = new EaseInOut(5), .time = 2 });
 		//scene.wait(1);
 		//scene.animate({ .anim = new RotateTo(o1, glm::angleAxis(3.1415f/2, glm::vec3(0,0,1))), .curve = new EaseInOut(5), .time = 2 });
-		//scene.animate({ .anim = new MoveTo(o1, glm::vec3(1, 0, 0)), .curve = new EaseInOut(5), .time = 2 });
+		
+		scene.animate({ .anim = new MoveTo(o1, glm::vec3(-1, 0, 0)), .curve = new EaseInOut(5), .time = 1 });
 		//scene.animate({ .anim = new ScaleTo(o1, glm::vec3(0.5,0.1,0.3)), .curve = new EaseInOut(5), .time = 2 });
 
-		scene.animAttach(new TranslateBy(o1, glm::vec3(10, 0, 10)));
+		//scene.animAttach(new TranslateBy(o2, glm::vec3(0.1, 0, 0.1)));
 
 		scene.wait(100);
 	}

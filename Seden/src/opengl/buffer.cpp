@@ -45,12 +45,12 @@ namespace Seden {
 
 	IndexBuffer::IndexBuffer() {
 		glGenBuffers(1, &m_id);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
+		bind();
 	}
 
 	IndexBuffer::IndexBuffer(uint32_t count, uint32_t* indices) {
 		IndexBuffer();
-		data(count, indices);
+		setData(count, indices);
 	}
 
 	IndexBuffer::~IndexBuffer() {
@@ -67,10 +67,11 @@ namespace Seden {
 			indices[6 * i + 4] = 4 * i + 3;
 			indices[6 * i + 5] = 4 * i + 0;
 		}
-		data(quadNumber * 6, indices.data());
+		setData(quadNumber * 6, indices.data());
 	}
 
-	void IndexBuffer::data(uint32_t count, uint32_t* indices) {
+	void IndexBuffer::setData(uint32_t count, uint32_t* indices) {
+		bind();
 		m_count = count;
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * count, indices, GL_STATIC_DRAW);

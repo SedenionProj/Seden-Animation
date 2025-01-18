@@ -80,11 +80,22 @@ namespace Seden {
 	}
 
 	// PolygonMesh implementation
+	size_t PolygonMesh::totalVertexCount = 0;
+	bool PolygonMesh::hasVertexCountChanged = false;
+
 	PolygonMesh::PolygonMesh(const std::initializer_list<Vertex>& mesh) {
 		DEBUG_ASSERT(mesh.size() > 2, "Vertex count should be greater than 2");
 		for (const Vertex& vertice : mesh) {
 			m_vertices.push_back(vertice);
 		}
+		totalVertexCount += getVertexCount();
+		hasVertexCountChanged = true;
+	}
+
+	PolygonMesh::~PolygonMesh()
+	{
+		totalVertexCount -= getVertexCount();
+		hasVertexCountChanged = true;
 	}
 
 	void PolygonMesh::setColor(const glm::vec3& color) {

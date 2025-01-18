@@ -47,6 +47,8 @@ namespace Seden {
 
 		explicit PolygonMesh(const std::initializer_list<Vertex>& mesh);
 
+		~PolygonMesh();
+
 		void setColor(const glm::vec3& color);
 		void setColorGradient(const std::initializer_list<glm::vec3>& grad);
 
@@ -57,7 +59,9 @@ namespace Seden {
 		std::vector<Vertex>& getVertices();
 		const std::vector<Vertex>& getVertices() const;
 
-		
+		static bool hasVertexCountChanged;
+		static size_t totalVertexCount;
+
 	private:
 		std::vector<Vertex> m_vertices;
 	};

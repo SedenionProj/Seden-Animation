@@ -6,8 +6,6 @@
 #include "src/logger.h"
 #include "src/object/object.hpp"
 
-#define MAX_POLYGON_MESH 100000
-
 namespace Seden {
 	static void GLAPIENTRY MessageCallback(GLenum source,
 			GLenum type,
@@ -31,7 +29,7 @@ namespace Seden {
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(MessageCallback, 0);
 #endif
-
+		polygonMeshIBO = new IndexBuffer();
 		polygonMeshVBO = new VertexBuffer();
 		polygonMeshVAO = new VertexArray();
 		polygonMeshVAO->addVertexBuffer(*polygonMeshVBO, VertexArrayLayout({
@@ -56,27 +54,59 @@ namespace Seden {
 		glfwPollEvents();
 		glClearColor(0.1f,0.1f,0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+		if (PolygonMesh::hasVertexCountChanged) {
+			polygonMeshVBO->setData(PolygonMesh::totalVertexCount*sizeof(PolygonMesh::Vertex));
+			polygonMeshIndices.reserve(PolygonMesh::totalVertexCount);
+		}
 	}
 
 	void Renderer::endFrame()
 	{
+		if (PolygonMesh::totalVertexCount) {
+			if (PolygonMesh::hasVertexCountChanged) {
+				polygonMeshIBO->setData(polygonMeshIndices.size(), polygonMeshIndices.data());
+				PolygonMesh::hasVertexCountChanged = false;
+			}
+
+			polygonMeshOffset = 0;
+			shader->Bind();
+			shader->setMat4("view", m_camera->getView());
+			shader->setMat4("proj", m_camera->getProjection());
+			
+			polygonMeshIBO->bind();
+			polygonMeshVAO->bind();
+			glDrawElements(GL_TRIANGLES, polygonMeshIBO->getCount(), GL_UNSIGNED_INT, nullptr);
+		}
+
 		glfwSwapBuffers(m_window.getWindowPtr());
 	}
 
 	void Renderer::drawPolygonMesh(Transform& transform, PolygonMesh& mesh)
 	{
-		// todo batching
-		std::vector<PolygonMesh::Vertex> transformMesh;
-		for (auto& vertex : mesh.getVertices()) {
-			transformMesh.emplace_back(PolygonMesh::Vertex(glm::vec3(transform.getTransform() * glm::vec4(vertex.position, 1)), vertex.color));
+		// todo: skip if Vertex has not changed
+		const size_t n = mesh.getVertexCount();
+		
+		if (PolygonMesh::hasVertexCountChanged) {
+			for (int i = 1; i < n - 1; i++) {
+				polygonMeshIndices.emplace_back(polygonMeshOffset);
+				polygonMeshIndices.emplace_back(polygonMeshOffset + i);
+				polygonMeshIndices.emplace_back(polygonMeshOffset + i + 1);
+
+				
+			}
 		}
 
-		shader->Bind();
-		shader->setMat4("view", m_camera->getView());
-		shader->setMat4("proj", m_camera->getProjection());
+		std::vector<PolygonMesh::Vertex> vertex(n);
+		for (int i = 0; i < n; i++) {
+			vertex[i].position = glm::vec3(transform.getTransform()*glm::vec4(mesh.getVertex(i).position, 1));
+			vertex[i].color = mesh.getVertex(i).color;
+		}
 
-		polygonMeshVBO->setData(mesh.getsize(), transformMesh.data());
-		polygonMeshVAO->bind();
-		glDrawArrays(GL_TRIANGLE_FAN, 0, mesh.getVertexCount());
+		polygonMeshVBO->changeData(n * sizeof(PolygonMesh::Vertex),
+			polygonMeshOffset * sizeof(PolygonMesh::Vertex),
+			vertex.data());
+
+		polygonMeshOffset += n;
 	}
 }

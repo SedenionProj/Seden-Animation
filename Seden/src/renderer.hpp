@@ -25,9 +25,10 @@ namespace Seden {
 
 		VertexBuffer* polygonMeshVBO;
 		VertexArray* polygonMeshVAO;
+		IndexBuffer* polygonMeshIBO;
+		std::vector<uint32_t> polygonMeshIndices;
+		uint32_t polygonMeshOffset = 0;
 		Shader* shader;
-
-		static std::vector<PolygonMesh::Vertex> vertexList;
 
 		Window& m_window;
 	};
