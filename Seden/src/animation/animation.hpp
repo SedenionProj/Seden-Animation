@@ -40,7 +40,7 @@ namespace Seden {
 	template<typename T>
 	class VariableAnimation : public Animation {
 	public:
-		VariableAnimation(T* var, T to, Curve* curve, float time, float shift = 0) 
+		VariableAnimation(T* var, T to, Curve* curve, float time, float shift = 0)
 			: m_var(var), m_from(*var), m_to(to), m_curve(curve), m_time(time) {
 			shiftStart(shift);
 		}
@@ -78,11 +78,11 @@ namespace Seden {
 	class FunctionAnimation : public Animation {
 	public:
 		FunctionAnimation(Animator* anim, Curve* curve, float time, float shift = 0)
-			:  m_anim(anim), m_curve(curve), m_time(time) {
+			: m_anim(anim), m_curve(curve), m_time(time) {
 			shiftStart(shift);
 		}
 
-		virtual ~FunctionAnimation(){
+		virtual ~FunctionAnimation() {
 			delete m_anim;
 			delete m_curve;
 		}
@@ -92,12 +92,12 @@ namespace Seden {
 			t += step_dt;
 			if (t < 0) return;
 			if (t > 1) finish();
-			else at(t, step_dt);
+			else at(t);
 		}
 
-		void at(float time, float step_dt) {
+		void at(float time) {
 			float f_t = m_curve->get(time);
-			m_anim->update(f_t, f_t- prev_f_t);
+			m_anim->update(f_t, f_t - prev_f_t);
 			prev_f_t = f_t;
 		}
 
@@ -106,7 +106,7 @@ namespace Seden {
 	private:
 		void finish() {
 			finished = true;
-			at(1.f,0);
+			at(1.f);
 		}
 
 	private:
@@ -114,4 +114,21 @@ namespace Seden {
 		Curve* m_curve;
 		float m_time;
 	};
+
+    class AttachAnimation : public Animation {
+		// todo: detach, fade
+    public:
+        AttachAnimation(Animator* anim, float shift = 0)
+            : m_anim(anim) {
+            shiftStart(shift);
+        }
+
+        void update(float dt) override {
+            t += dt;
+            m_anim->update(t, dt);
+        }
+
+    private:
+        Animator* m_anim;
+    };
 }

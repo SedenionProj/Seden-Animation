@@ -32,6 +32,8 @@ namespace Seden {
 		template<typename Animator, typename... Args>
 		void animGroup(const GroupObjects& objects, Args&&... args);
 
+		void animAttach(Animator* anim);
+
 		entt::registry& getRegistry() { return m_registry; }
 
 	private:

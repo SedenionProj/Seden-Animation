@@ -27,6 +27,8 @@ namespace Seden {
 		VertexArray* polygonMeshVAO;
 		Shader* shader;
 
+		static std::vector<PolygonMesh::Vertex> vertexList;
+
 		Window& m_window;
 	};
 }

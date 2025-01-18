@@ -12,11 +12,14 @@ namespace Seden {
         m_animations.push_back(std::make_unique<FunctionAnimation>(anim.anim, anim.curve, anim.time));
     }
 
+    void Scene::animAttach(Animator* anim)
+    {
+        m_animations.push_back(std::make_unique<AttachAnimation>(anim));
+    }
+
 	void Scene::startAnimationLoop()
 	{
         while (m_window.isRunning()) {
-
-
             m_animations.erase(
                 std::remove_if(
                     m_animations.begin(), m_animations.end(),

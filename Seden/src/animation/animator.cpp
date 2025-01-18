@@ -23,4 +23,25 @@ namespace Seden {
 	}
 
 	
+	RotateTo::RotateTo(std::shared_ptr<Object> obj, const glm::quat& quaterion)
+		: m_quat(quaterion), m_transform(obj->get<Transform>()){
+		m_from = m_transform.getRotation();
+	}
+
+	void RotateTo::update(float time, float dt)
+	{
+		m_transform.setRotation(glm::lerp(m_from, m_quat, time));
+	}
+
+	ScaleTo::ScaleTo(std::shared_ptr<Object> obj, const glm::vec3& scale)
+		: m_scale(scale), m_transform(obj->get<Transform>()){
+		m_from = m_transform.getScale();
+
+	}
+
+	void ScaleTo::update(float time, float dt)
+	{
+		m_transform.setScale(lerp(m_from, m_scale, time));
+	}
+
 }
