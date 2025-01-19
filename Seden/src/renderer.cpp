@@ -25,9 +25,11 @@ namespace Seden {
 	{
 		gladLoadGL();
 		
-#if defined(DEBUG) || defined(_DEBUG)
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(MessageCallback, 0);
+#if defined(DEBUG) || defined(_DEBUG)
+		//glEnable(GL_DEBUG_OUTPUT);
+		//glDebugMessageCallback(MessageCallback, 0);
 #endif
 		polygonMeshIBO = new IndexBuffer();
 		polygonMeshVBO = new VertexBuffer();
@@ -42,6 +44,7 @@ namespace Seden {
 
 	Renderer::~Renderer()
 	{
+		//delete buffers
 	}
 
 	void Renderer::setCamera(std::shared_ptr<PerspectiveCamera> camera)
@@ -56,8 +59,9 @@ namespace Seden {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		if (PolygonMesh::hasVertexCountChanged) {
-			polygonMeshVBO->setData(PolygonMesh::totalVertexCount*sizeof(PolygonMesh::Vertex));
+			std::cout << "polygonMeshVBO size " << PolygonMesh::totalVertexCount<<"\n";
 			polygonMeshIndices.reserve(PolygonMesh::totalVertexCount);
+			m_vertex.resize(PolygonMesh::totalVertexCount);
 		}
 	}
 
@@ -68,6 +72,7 @@ namespace Seden {
 				polygonMeshIBO->setData(polygonMeshIndices.size(), polygonMeshIndices.data());
 				PolygonMesh::hasVertexCountChanged = false;
 			}
+			polygonMeshVBO->setData(PolygonMesh::totalVertexCount * sizeof(PolygonMesh::Vertex), m_vertex.data());
 
 			polygonMeshOffset = 0;
 			shader->Bind();
@@ -84,28 +89,27 @@ namespace Seden {
 
 	void Renderer::drawPolygonMesh(Transform& transform, PolygonMesh& mesh)
 	{
-		// todo: skip if Vertex has not changed
+		// todo: skip if Vertex has not changed, multiple batches
 		const size_t n = mesh.getVertexCount();
-		
+
 		if (PolygonMesh::hasVertexCountChanged) {
 			for (int i = 1; i < n - 1; i++) {
 				polygonMeshIndices.emplace_back(polygonMeshOffset);
 				polygonMeshIndices.emplace_back(polygonMeshOffset + i);
 				polygonMeshIndices.emplace_back(polygonMeshOffset + i + 1);
-
-				
 			}
 		}
-
-		std::vector<PolygonMesh::Vertex> vertex(n);
+		
 		for (int i = 0; i < n; i++) {
-			vertex[i].position = glm::vec3(transform.getTransform()*glm::vec4(mesh.getVertex(i).position, 1));
-			vertex[i].color = mesh.getVertex(i).color;
+			const auto& meshVertex = mesh.getVertex(i);
+			m_vertex[polygonMeshOffset+i].position = transform.getTransform() * glm::vec4(meshVertex.position, 1);
+			m_vertex[polygonMeshOffset+i].color = meshVertex.color;
 		}
 
-		polygonMeshVBO->changeData(n * sizeof(PolygonMesh::Vertex),
-			polygonMeshOffset * sizeof(PolygonMesh::Vertex),
-			vertex.data());
+		//polygonMeshVBO->changeData(n * sizeof(PolygonMesh::Vertex),
+		//	polygonMeshOffset * sizeof(PolygonMesh::Vertex),
+		//	m_vertex.data());
+		//
 
 		polygonMeshOffset += n;
 	}

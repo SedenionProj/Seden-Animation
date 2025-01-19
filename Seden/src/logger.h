@@ -1,7 +1,7 @@
 #pragma once
-#include <iostream>
+#include <stdio.h>
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if 1
 	#if defined(SEDEN_VERBOSE)
 		#define DEBUG_ERROR(Message, ...) \
 		    printf("ERROR: " Message " [%s:%d]\n", __FILE__, __LINE__, ##__VA_ARGS__)

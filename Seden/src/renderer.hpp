@@ -30,6 +30,8 @@ namespace Seden {
 		uint32_t polygonMeshOffset = 0;
 		Shader* shader;
 
+		std::vector<PolygonMesh::Vertex> m_vertex;
+
 		Window& m_window;
 	};
 }

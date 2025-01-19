@@ -10,6 +10,7 @@
 #include "src/logger.h"
 #include "src/util/deltaTime.hpp"
 #include "src/window.hpp"
+#include "src/util/sync.h"
 
 namespace Seden {
 	class PerspectiveCamera;
@@ -34,7 +35,17 @@ namespace Seden {
 
 		void animAttach(Animator* anim);
 
+		void block() {
+			m_loopSync.block();
+			m_FrameBeginSync.waitUntilUnblocked();
+		}
+
+		void unBlock() {
+			m_loopSync.unBlock();
+		}
+
 		entt::registry& getRegistry() { return m_registry; }
+		std::mutex m_animationsMutex;
 
 	private:
 		void draw();
@@ -44,6 +55,9 @@ namespace Seden {
 		Window& m_window;
 		Renderer m_renderer{m_window};
 		DeltaTime m_dt;
+
+		Sync m_loopSync;
+		Sync m_FrameBeginSync;
 
 		std::vector<std::unique_ptr<Animation>> m_animations;
 	};
