@@ -11,7 +11,7 @@ namespace Seden {
 			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 			window = glfwCreateWindow(width, height, name, nullptr, nullptr);
 			glfwMakeContextCurrent(window);
-			//glfwSwapInterval(1);
+			glfwSwapInterval(0);
 		}
 
 		~Window() {

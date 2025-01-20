@@ -177,10 +177,6 @@ namespace Seden {
 		m_objects.clear();
 	}
 
-	auto GroupObjects::begin() { return m_objects.begin(); }
-	auto GroupObjects::end() { return m_objects.end(); }
-	auto GroupObjects::begin() const { return m_objects.begin(); }
-	auto GroupObjects::end() const { return m_objects.end(); }
 
 	// Perspective implementation
 	Perspective::Perspective(float aspectRatio) : m_projection(glm::perspective(glm::radians(90.f), aspectRatio, 0.01f, 100.f)) {}

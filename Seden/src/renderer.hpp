@@ -21,6 +21,9 @@ namespace Seden {
 		void drawPolygonMesh(Transform& transform, PolygonMesh& mesh);
 
 	private:
+		void initImgui();
+
+	private:
 		std::shared_ptr<PerspectiveCamera> m_camera;
 
 		VertexBuffer* polygonMeshVBO;

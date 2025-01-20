@@ -25,8 +25,9 @@ namespace Seden {
 			m_FrameBeginSync.block();
 
 			bool hasAnimToRemove = false;
+			float dt = m_dt.getElapsedTime();
 			for (auto& anim : m_animations) {
-				anim->update(m_dt.getElapsedTime());
+				anim->update(dt);
 				if (anim->finished)
 					hasAnimToRemove = true;
 			}
@@ -38,16 +39,17 @@ namespace Seden {
 							return anim->finished;
 						}),
 					m_animations.end());
-			}
-
-			std::cout << 1.f / m_dt.getElapsedTime() << "\n";
+			}	
 			m_dt.reset();
+
+			DEBUG_MSG("%f",1.f / dt);
 
 			m_renderer.beginFrame();
 			draw();
 			m_renderer.endFrame();
 
 			m_FrameBeginSync.unBlock();
+			
 		}
 	}
 
@@ -63,5 +65,7 @@ namespace Seden {
 				m_registry.get<Transform>(entity), 
 				m_registry.get<PolygonMesh>(entity));
 		}
-	}	
+	}
+
+
 }

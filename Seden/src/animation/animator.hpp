@@ -21,7 +21,7 @@ namespace Seden {
 
 	private:
 		glm::vec3 m_from;
-		const glm::vec3& m_pos;
+		glm::vec3 m_pos;
 		Transform& m_transform;
 	};
 
@@ -32,7 +32,7 @@ namespace Seden {
 		void update(float time, float dt) override;
 
 	private:
-		const glm::vec3& m_vec;
+		glm::vec3 m_vec;
 		Transform& m_transform;
 	};
 
@@ -44,7 +44,7 @@ namespace Seden {
 
 	private:
 		glm::quat m_from;
-		const glm::quat& m_quat;
+		glm::quat m_quat;
 		Transform& m_transform;
 	};
 
@@ -56,7 +56,7 @@ namespace Seden {
 
 	private:
 		glm::vec3 m_from;
-		const glm::vec3& m_scale;
+		glm::vec3 m_scale;
 		Transform& m_transform;
 	};
 }

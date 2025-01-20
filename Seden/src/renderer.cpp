@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include "src/renderer.hpp"
 #include "src/object/components.hpp"
@@ -25,6 +28,8 @@ namespace Seden {
 	{
 		gladLoadGL();
 		
+		initImgui();
+
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(MessageCallback, 0);
 #if defined(DEBUG) || defined(_DEBUG)
@@ -44,6 +49,9 @@ namespace Seden {
 
 	Renderer::~Renderer()
 	{
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
 		//delete buffers
 	}
 
@@ -52,14 +60,32 @@ namespace Seden {
 		m_camera = camera;
 	}
 
+	void Renderer::initImgui()
+	{
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+
+		ImGui_ImplGlfw_InitForOpenGL(m_window.getWindowPtr(), true);
+		ImGui_ImplOpenGL3_Init("#version 330");
+	}
+
 	void Renderer::beginFrame()
 	{
 		glfwPollEvents();
 		glClearColor(0.1f,0.1f,0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+		// imgui
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		if (PolygonMesh::hasVertexCountChanged) {
-			std::cout << "polygonMeshVBO size " << PolygonMesh::totalVertexCount<<"\n";
+			polygonMeshIndices.clear();
 			polygonMeshIndices.reserve(PolygonMesh::totalVertexCount);
 			m_vertex.resize(PolygonMesh::totalVertexCount);
 		}
@@ -67,6 +93,14 @@ namespace Seden {
 
 	void Renderer::endFrame()
 	{
+		// imgui render
+		//ImGui::Begin("debug");
+		//ImGui::Text("totalVertexCount %d", PolygonMesh::totalVertexCount);
+		//ImGui::Text("vertex vec count %d", m_vertex.size());
+		//ImGui::Text("indices count %d", polygonMeshIndices.size());
+		//ImGui::End();
+
+
 		if (PolygonMesh::totalVertexCount) {
 			if (PolygonMesh::hasVertexCountChanged) {
 				polygonMeshIBO->setData(polygonMeshIndices.size(), polygonMeshIndices.data());
@@ -84,14 +118,22 @@ namespace Seden {
 			glDrawElements(GL_TRIANGLES, polygonMeshIBO->getCount(), GL_UNSIGNED_INT, nullptr);
 		}
 
+
+
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(m_window.getWindowPtr());
+
+		DEBUG_CHECK_OPENGL();
 	}
 
 	void Renderer::drawPolygonMesh(Transform& transform, PolygonMesh& mesh)
 	{
-		// todo: skip if Vertex has not changed, multiple batches
+		// todo: skip if Vertex has not changed, multiple batches, reserve the right amount of indices
 		const size_t n = mesh.getVertexCount();
-
+		
 		if (PolygonMesh::hasVertexCountChanged) {
 			for (int i = 1; i < n - 1; i++) {
 				polygonMeshIndices.emplace_back(polygonMeshOffset);
@@ -99,18 +141,12 @@ namespace Seden {
 				polygonMeshIndices.emplace_back(polygonMeshOffset + i + 1);
 			}
 		}
-		
 		for (int i = 0; i < n; i++) {
 			const auto& meshVertex = mesh.getVertex(i);
 			m_vertex[polygonMeshOffset+i].position = transform.getTransform() * glm::vec4(meshVertex.position, 1);
 			m_vertex[polygonMeshOffset+i].color = meshVertex.color;
 		}
-
-		//polygonMeshVBO->changeData(n * sizeof(PolygonMesh::Vertex),
-		//	polygonMeshOffset * sizeof(PolygonMesh::Vertex),
-		//	m_vertex.data());
-		//
-
+		
 		polygonMeshOffset += n;
 	}
 }

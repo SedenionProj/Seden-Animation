@@ -80,10 +80,10 @@ namespace Seden {
 		size_t size() const;
 		void clear();
 
-		auto begin();
-		auto end();
-		auto begin() const;
-		auto end() const;
+		auto begin() { return m_objects.begin(); }
+		auto end() { return m_objects.end(); }
+		auto begin() const { return m_objects.begin(); }
+		auto end() const { return m_objects.end(); }
 
 	private:
 		std::vector<std::shared_ptr<Object>> m_objects;
