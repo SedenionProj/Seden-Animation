@@ -2,13 +2,15 @@ cmake_minimum_required(VERSION 3.7)
 project(Seden)
 set (CMAKE_CXX_STANDARD 20)
 
-find_package(OpenGL REQUIRED)
-
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/Seden/vendor)
 
 file(GLOB_RECURSE SEDEN_SOURCE
 	Seden/src/*.cpp
 )
+
+if (MSVC)
+  add_definitions(/wd4244 /wd4267 /wd4305)
+endif ()
 
 add_library (seden_lib ${SEDEN_SOURCE})
 

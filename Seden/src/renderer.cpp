@@ -32,19 +32,17 @@ namespace Seden {
 
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(MessageCallback, 0);
-#if defined(DEBUG) || defined(_DEBUG)
-		//glEnable(GL_DEBUG_OUTPUT);
-		//glDebugMessageCallback(MessageCallback, 0);
-#endif
-		polygonMeshIBO = new IndexBuffer();
-		polygonMeshVBO = new VertexBuffer();
-		polygonMeshVAO = new VertexArray();
-		polygonMeshVAO->addVertexBuffer(*polygonMeshVBO, VertexArrayLayout({
+
+		m_polygonData.ibo = std::make_unique<IndexBuffer>();
+		m_polygonData.vbo= std::make_unique<VertexBuffer>();
+		m_polygonData.vao= std::make_unique<VertexArray>();
+		m_polygonData.shader = std::make_unique<Shader>();
+		m_polygonData.shader->createShader(baseVertexShader, baseFragmentShader);
+		m_polygonData.vao->addVertexBuffer(*m_polygonData.vbo, VertexArrayLayout({
 			3, // position
 			3, // color
 		}));
-		shader = new Shader();
-		shader->createShader(baseVertexShader, baseFragmentShader);
+		
 	}
 
 	Renderer::~Renderer()
@@ -52,7 +50,6 @@ namespace Seden {
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
-		//delete buffers
 	}
 
 	void Renderer::setCamera(std::shared_ptr<PerspectiveCamera> camera)
@@ -84,43 +81,31 @@ namespace Seden {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		if (PolygonMesh::hasVertexCountChanged) {
-			polygonMeshIndices.clear();
-			polygonMeshIndices.reserve(PolygonMesh::totalVertexCount);
-			m_vertex.resize(PolygonMesh::totalVertexCount);
+		if (Comp::PolygonMesh::hasVertexCountChanged) {
+			m_polygonData.indicesList.clear();
+			m_polygonData.indicesList.reserve(Comp::PolygonMesh::totalVertexCount);
+			m_polygonData.verticesList.resize(Comp::PolygonMesh::totalVertexCount);
 		}
 	}
 
 	void Renderer::endFrame()
 	{
-		// imgui render
-		//ImGui::Begin("debug");
-		//ImGui::Text("totalVertexCount %d", PolygonMesh::totalVertexCount);
-		//ImGui::Text("vertex vec count %d", m_vertex.size());
-		//ImGui::Text("indices count %d", polygonMeshIndices.size());
-		//ImGui::End();
-
-
-		if (PolygonMesh::totalVertexCount) {
-			if (PolygonMesh::hasVertexCountChanged) {
-				polygonMeshIBO->setData(polygonMeshIndices.size(), polygonMeshIndices.data());
-				PolygonMesh::hasVertexCountChanged = false;
+		if (Comp::PolygonMesh::totalVertexCount) {
+			if (Comp::PolygonMesh::hasVertexCountChanged) {
+				m_polygonData.ibo->setData(m_polygonData.indicesList.size(), m_polygonData.indicesList.data());
+				Comp::PolygonMesh::hasVertexCountChanged = false;
 			}
-			polygonMeshVBO->setData(PolygonMesh::totalVertexCount * sizeof(PolygonMesh::Vertex), m_vertex.data());
+			m_polygonData.vbo->setData(Comp::PolygonMesh::totalVertexCount * sizeof(Comp::PolygonMesh::Vertex), m_polygonData.verticesList.data());
 
-			polygonMeshOffset = 0;
-			shader->Bind();
-			shader->setMat4("view", m_camera->getView());
-			shader->setMat4("proj", m_camera->getProjection());
-			
-			polygonMeshIBO->bind();
-			polygonMeshVAO->bind();
-			glDrawElements(GL_TRIANGLES, polygonMeshIBO->getCount(), GL_UNSIGNED_INT, nullptr);
+			m_polygonData.vertexOffset = 0;
+			m_polygonData.shader->Bind();
+			m_polygonData.shader->setMat4("view", m_camera->getView());
+			m_polygonData.shader->setMat4("proj", m_camera->getProjection());
+		
+			m_polygonData.ibo->bind();
+			m_polygonData.vao->bind();
+			glDrawElements(GL_TRIANGLES, m_polygonData.ibo->getCount(), GL_UNSIGNED_INT, nullptr);
 		}
-
-
-
-
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -129,24 +114,36 @@ namespace Seden {
 		DEBUG_CHECK_OPENGL();
 	}
 
-	void Renderer::drawPolygonMesh(Transform& transform, PolygonMesh& mesh)
+	void Renderer::drawDebugGui() {
+		ImGui::Begin("debug");
+		ImGui::Text("ms %f", m_stats.frameTimeElapsed);
+		ImGui::Text("fps %f", 1.f/m_stats.frameTimeElapsed);
+		ImGui::Text("animation count %d", m_stats.animationCount);
+		ImGui::Text("object alive count %d", m_stats.objectAliveCount);
+		ImGui::End();
+	}
+
+	void Renderer::drawConvexPolygon(Comp::Transform& transform, Comp::PolygonMesh& mesh)
 	{
 		// todo: skip if Vertex has not changed, multiple batches, reserve the right amount of indices
 		const size_t n = mesh.getVertexCount();
-		
-		if (PolygonMesh::hasVertexCountChanged) {
+
+		if (Comp::PolygonMesh::hasVertexCountChanged) {
 			for (int i = 1; i < n - 1; i++) {
-				polygonMeshIndices.emplace_back(polygonMeshOffset);
-				polygonMeshIndices.emplace_back(polygonMeshOffset + i);
-				polygonMeshIndices.emplace_back(polygonMeshOffset + i + 1);
+				m_polygonData.indicesList.emplace_back(m_polygonData.vertexOffset);
+				m_polygonData.indicesList.emplace_back(m_polygonData.vertexOffset + i);
+				m_polygonData.indicesList.emplace_back(m_polygonData.vertexOffset + i + 1);
 			}
 		}
+
+
 		for (int i = 0; i < n; i++) {
 			const auto& meshVertex = mesh.getVertex(i);
-			m_vertex[polygonMeshOffset+i].position = transform.getTransform() * glm::vec4(meshVertex.position, 1);
-			m_vertex[polygonMeshOffset+i].color = meshVertex.color;
+			auto& vertex = m_polygonData.verticesList[m_polygonData.vertexOffset + i];
+			vertex.position = transform.getTransform() * glm::vec4(meshVertex.position, 1);
+			vertex.color = meshVertex.color;
 		}
-		
-		polygonMeshOffset += n;
+
+		m_polygonData.vertexOffset += n;
 	}
 }

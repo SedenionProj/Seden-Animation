@@ -6,7 +6,9 @@
 
 namespace Seden {
 	class Object;
-	class Transform;
+	namespace Comp {
+		class Transform;
+	}
 
 	class Animator {
 	public:
@@ -22,7 +24,7 @@ namespace Seden {
 	private:
 		glm::vec3 m_from;
 		glm::vec3 m_pos;
-		Transform& m_transform;
+		Comp::Transform& m_transform;
 	};
 
 	class TranslateBy : public Animator {
@@ -33,7 +35,7 @@ namespace Seden {
 
 	private:
 		glm::vec3 m_vec;
-		Transform& m_transform;
+		Comp::Transform& m_transform;
 	};
 
 	class RotateTo : public Animator {
@@ -45,7 +47,7 @@ namespace Seden {
 	private:
 		glm::quat m_from;
 		glm::quat m_quat;
-		Transform& m_transform;
+		Comp::Transform& m_transform;
 	};
 
 	class ScaleTo : public Animator {
@@ -57,6 +59,6 @@ namespace Seden {
 	private:
 		glm::vec3 m_from;
 		glm::vec3 m_scale;
-		Transform& m_transform;
+		Comp::Transform& m_transform;
 	};
 }

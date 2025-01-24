@@ -4,7 +4,11 @@
 
 namespace Seden {
 	void Scene::wait(float seconds) {
-		std::this_thread::sleep_for(std::chrono::duration<float>(seconds));
+		Clock clock;
+		for (float i = 0.f; i < seconds; i += clock.getElapsedTimeAndReset()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			if(!m_window.isRunning()) break;
+		}
 	}
 
     void Scene::animate(FunctionAnimationInfo anim)
@@ -20,12 +24,14 @@ namespace Seden {
 
 	void Scene::startAnimationLoop()
 	{
+		Clock clock;
+
 		while (m_window.isRunning()) {
 			m_loopSync.waitUntilUnblocked();
 			m_FrameBeginSync.block();
 
 			bool hasAnimToRemove = false;
-			float dt = m_dt.getElapsedTime();
+			float dt = clock.getElapsedTimeAndReset();
 			for (auto& anim : m_animations) {
 				anim->update(dt);
 				if (anim->finished)
@@ -40,31 +46,35 @@ namespace Seden {
 						}),
 					m_animations.end());
 			}	
-			m_dt.reset();
 
-			DEBUG_MSG("%f",1.f / dt);
+			m_renderer.m_stats.frameTimeElapsed = dt;
+			m_renderer.m_stats.animationCount = m_animations.size();
+			m_renderer.m_stats.objectAliveCount = m_registry.storage<entt::entity>().size();
+
 
 			m_renderer.beginFrame();
 			draw();
+			m_renderer.drawDebugGui();
 			m_renderer.endFrame();
 
 			m_FrameBeginSync.unBlock();
 			
 		}
+		DEBUG_MSG("end of animation loop");
 	}
 
-
+	
     void Scene::setCamera(std::shared_ptr<PerspectiveCamera> camera)
     {
         m_renderer.setCamera(camera);
     }
 
 	void Scene::draw() {
-		for (auto entity : m_registry.view<PolygonMesh>()) {
-			m_renderer.drawPolygonMesh(
-				m_registry.get<Transform>(entity), 
-				m_registry.get<PolygonMesh>(entity));
-		}
+		m_registry.view<Comp::Transform, Comp::PolygonMesh>().each([this](auto& transform, auto& mesh) {
+			m_renderer.drawConvexPolygon(transform, mesh);
+		});
+
+
 	}
 
 

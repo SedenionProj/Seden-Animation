@@ -8,14 +8,14 @@ namespace Seden {
 		glGenBuffers(1, &m_id);
 		glBindBuffer(GL_ARRAY_BUFFER, m_id);
 	}
-	VertexBuffer::VertexBuffer(size_t size, const void* data) {
-		VertexBuffer();
+	VertexBuffer::VertexBuffer(size_t size, const void* data)
+		: VertexBuffer()
+	{
 		setData(size, data);
 	}
 
-	VertexBuffer::VertexBuffer(size_t size) {
-		VertexBuffer(size, nullptr);
-	}
+	VertexBuffer::VertexBuffer(size_t size) 
+		: VertexBuffer(size, nullptr) {}
 
 	VertexBuffer::~VertexBuffer() {
 		glDeleteBuffers(1, &m_id);
@@ -48,8 +48,9 @@ namespace Seden {
 		bind();
 	}
 
-	IndexBuffer::IndexBuffer(uint32_t count, uint32_t* indices) {
-		IndexBuffer();
+	IndexBuffer::IndexBuffer(uint32_t count, uint32_t* indices) 
+		: IndexBuffer()
+	{
 		setData(count, indices);
 	}
 

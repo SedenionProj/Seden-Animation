@@ -17,24 +17,40 @@ namespace Seden {
 
 		void beginFrame();
 		void endFrame();
+		void drawDebugGui();
 
-		void drawPolygonMesh(Transform& transform, PolygonMesh& mesh);
+		void drawConvexPolygon(Comp::Transform& transform, Comp::PolygonMesh& mesh);
+
+	public:
+		struct DebugStats
+		{
+			float frameTimeElapsed = 0;
+			uint32_t animationCount = 0;
+			uint32_t objectAliveCount = 0;
+		};
+
+		DebugStats m_stats;
 
 	private:
 		void initImgui();
 
 	private:
+		struct PolygonData
+		{
+			std::unique_ptr<VertexBuffer> vbo;
+			std::unique_ptr<VertexArray>  vao;
+			std::unique_ptr<IndexBuffer>  ibo;
+			std::unique_ptr<Shader> shader;
+			std::vector<Comp::PolygonMesh::Vertex> verticesList;
+			std::vector<uint32_t> indicesList;
+			uint32_t vertexOffset = 0;
+		};
+
+		PolygonData m_polygonData;
+
+		
+
 		std::shared_ptr<PerspectiveCamera> m_camera;
-
-		VertexBuffer* polygonMeshVBO;
-		VertexArray* polygonMeshVAO;
-		IndexBuffer* polygonMeshIBO;
-		std::vector<uint32_t> polygonMeshIndices;
-		uint32_t polygonMeshOffset = 0;
-		Shader* shader;
-
-		std::vector<PolygonMesh::Vertex> m_vertex;
-
 		Window& m_window;
 	};
 }

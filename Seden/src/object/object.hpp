@@ -8,7 +8,7 @@ namespace Seden {
 	class Object {
 	public:
 		Object(Scene& scene) : m_scene(scene) {
-			m_entity = m_scene.getRegistry().create();
+			m_entity = m_scene.m_registry.create();
 		}
 
 		static std::shared_ptr<Object> create(Scene& scene) {
@@ -17,27 +17,27 @@ namespace Seden {
 
 		template<typename T, typename... Args>
 		T& add(Args&&... args) {
-			return m_scene.getRegistry().emplace<T>(m_entity, std::forward<Args>(args)...);
+			return m_scene.m_registry.emplace<T>(m_entity, std::forward<Args>(args)...);
 		}
 
 		template<typename T, typename I>
 		T& add(const std::initializer_list<I>& il) {
-			return m_scene.getRegistry().emplace<T>(m_entity, il);
+			return m_scene.m_registry.emplace<T>(m_entity, il);
 		}
 
 		template<typename T>
 		T& get() {
 			// todo: maybe add a safety check, or add "getOrCreate" function
-			return m_scene.getRegistry().get<T>(m_entity);
+			return m_scene.m_registry.get<T>(m_entity);
 		}
 		template<typename... Args>
 		bool has() {
-			return m_scene.getRegistry().all_of<Args...>(m_entity);
+			return m_scene.m_registry.all_of<Args...>(m_entity);
 		}
 
 		template<typename T>
 		void remove() {
-			m_scene.getRegistry().remove<T>(m_entity);
+			m_scene.m_registry.remove<T>(m_entity);
 		}
 
 	private:
@@ -47,13 +47,13 @@ namespace Seden {
 
 	class ConvexPolygon : public Object {
 	public:
-		static std::shared_ptr<ConvexPolygon> create(Scene& scene, const std::initializer_list<PolygonMesh::Vertex> vertices) {
+		static std::shared_ptr<ConvexPolygon> create(Scene& scene, const std::initializer_list<Comp::PolygonMesh::Vertex> vertices) {
 			return std::make_shared<ConvexPolygon>(scene, vertices);
 		}
 
-		ConvexPolygon(Scene& scene, const std::initializer_list<PolygonMesh::Vertex> vertices) : Object(scene) {
-			add<Transform>(glm::mat4(1));
-			add<PolygonMesh, PolygonMesh::Vertex>(vertices);
+		ConvexPolygon(Scene& scene, const std::initializer_list<Comp::PolygonMesh::Vertex> vertices) : Object(scene) {
+			add<Comp::Transform>(glm::mat4(1));
+			add<Comp::PolygonMesh, Comp::PolygonMesh::Vertex>(vertices);
 		}
 	};
 
@@ -64,8 +64,8 @@ namespace Seden {
 		}
 
 		Quad(Scene& scene) : Object(scene) {
-			add<Transform>(glm::mat4(1));
-			add<PolygonMesh, PolygonMesh::Vertex>({ 
+			add<Comp::Transform>(glm::mat4(1));
+			add<Comp::PolygonMesh, Comp::PolygonMesh::Vertex>({
 				{ glm::vec3(-0.5f, -0.5f,0) }, 
 				{ glm::vec3(0.5f,  -0.5f,0) },
 				{ glm::vec3(0.5f,   0.5f,0) },
@@ -81,7 +81,7 @@ namespace Seden {
 		}
 
 		glm::mat4 getView() {
-		    auto& t = get<Transform>();
+		    auto& t = get<Comp::Transform>();
 		    glm::quat rotation = t.getRotation();
 		    glm::vec3 pos = t.getPosition();
 		
@@ -92,13 +92,13 @@ namespace Seden {
 		}
 
 		glm::mat4& getProjection() {
-			return get<Perspective>().get();
+			return get<Comp::Perspective>().get();
 		}
 
 		PerspectiveCamera(Scene& scene) : Object(scene) {
-			auto& t = add<Transform>(glm::mat4(1));
+			auto& t = add<Comp::Transform>(glm::mat4(1));
 			t.setPosition({ 0, 0, -2 });
-			add<Perspective>(16.f / 9.f);
+			add<Comp::Perspective>(16.f / 9.f);
 		}
 	};
 
@@ -109,7 +109,7 @@ namespace Seden {
 		}
 
 		Text(Scene& scene) : Object(scene) {
-			add<Transform>(glm::mat4(1));
+			add<Comp::Transform>(glm::mat4(1));
 		}
 	};
 }

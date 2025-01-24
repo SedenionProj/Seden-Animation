@@ -8,7 +8,7 @@
 #include "src/animation/curve.hpp"
 #include "src/animation/animation.hpp"
 #include "src/logger.h"
-#include "src/util/deltaTime.hpp"
+#include "src/util/clock.hpp"
 #include "src/window.hpp"
 #include "src/util/sync.h"
 
@@ -31,7 +31,7 @@ namespace Seden {
 		void animate(FunctionAnimationInfo anim);
 
 		template<typename Animator, typename... Args>
-		void animGroup(const GroupObjects& objects, Args&&... args);
+		void animGroup(const Comp::GroupObjects& objects, Args&&... args);
 
 		void animAttach(Animator* anim);
 
@@ -54,12 +54,13 @@ namespace Seden {
 		entt::registry m_registry;
 		Window& m_window;
 		Renderer m_renderer{m_window};
-		DeltaTime m_dt;
 
 		Sync m_loopSync;
 		Sync m_FrameBeginSync;
 
 		std::vector<std::unique_ptr<Animation>> m_animations;
+
+		friend class Object;
 	};
 
 	template<typename T>
@@ -68,12 +69,12 @@ namespace Seden {
 	}
 
 	template<typename Animator, typename... Args>
-	void Scene::animGroup(const GroupObjects& objects, Args&&... args)
+	void Scene::animGroup(const Comp::GroupObjects& objects, Args&&... args)
 	{
 		float shift = 0;
 		for (std::shared_ptr<Object> o : objects) {
 			m_animations.push_back(std::make_unique<FunctionAnimation>(new Animator(o,std::forward<Args>(args)...), new EaseInOut(6), 5.f, shift));
-			shift += 0.1;
+			shift += 0.1f;
 		}
 	}
 }

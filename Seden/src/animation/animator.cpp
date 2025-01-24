@@ -5,7 +5,7 @@
 
 namespace Seden {
 	MoveTo::MoveTo(std::shared_ptr<Object> obj, const glm::vec3& pos)
-		: m_pos(pos), m_transform(obj->get<Transform>()) {
+		: m_pos(pos), m_transform(obj->get<Comp::Transform>()) {
 		m_from = m_transform.getPosition();
 	}
 
@@ -15,7 +15,7 @@ namespace Seden {
 	}
 
 	TranslateBy::TranslateBy(std::shared_ptr<Object> obj, const glm::vec3& vec)
-		: m_vec(vec), m_transform(obj->get<Transform>()) {}
+		: m_vec(vec), m_transform(obj->get<Comp::Transform>()) {}
 
 	void TranslateBy::update(float time, float dt)
 	{
@@ -24,7 +24,7 @@ namespace Seden {
 
 	
 	RotateTo::RotateTo(std::shared_ptr<Object> obj, const glm::quat& quaterion)
-		: m_quat(quaterion), m_transform(obj->get<Transform>()){
+		: m_quat(quaterion), m_transform(obj->get<Comp::Transform>()){
 		m_from = m_transform.getRotation();
 	}
 
@@ -34,7 +34,7 @@ namespace Seden {
 	}
 
 	ScaleTo::ScaleTo(std::shared_ptr<Object> obj, const glm::vec3& scale)
-		: m_scale(scale), m_transform(obj->get<Transform>()){
+		: m_scale(scale), m_transform(obj->get<Comp::Transform>()){
 		m_from = m_transform.getScale();
 
 	}
