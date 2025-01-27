@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.7)
 project(Seden)
 set (CMAKE_CXX_STANDARD 20)
 
+add_compile_definitions(SEDEN_VERBOSE)
+
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/Seden/vendor)
 
 file(GLOB_RECURSE SEDEN_SOURCE

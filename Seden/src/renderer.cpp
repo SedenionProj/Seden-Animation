@@ -33,16 +33,20 @@ namespace Seden {
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(MessageCallback, 0);
 
-		m_polygonData.ibo = std::make_unique<IndexBuffer>();
-		m_polygonData.vbo= std::make_unique<VertexBuffer>();
 		m_polygonData.vao= std::make_unique<VertexArray>();
+		m_polygonData.ibo = std::make_unique<IndexBuffer>();
+		m_polygonData.vbo = std::make_unique<VertexBuffer>();
 		m_polygonData.shader = std::make_unique<Shader>();
 		m_polygonData.shader->createShader(baseVertexShader, baseFragmentShader);
 		m_polygonData.vao->addVertexBuffer(*m_polygonData.vbo, VertexArrayLayout({
 			3, // position
 			3, // color
 		}));
-		
+
+		m_shader = std::make_unique<Shader>();
+		m_shader->createShader(letterVertexShader, letterFragmentShader);
+
+		m_font = std::make_unique<Font>();
 	}
 
 	Renderer::~Renderer()
@@ -102,7 +106,6 @@ namespace Seden {
 			m_polygonData.shader->setMat4("view", m_camera->getView());
 			m_polygonData.shader->setMat4("proj", m_camera->getProjection());
 		
-			m_polygonData.ibo->bind();
 			m_polygonData.vao->bind();
 			glDrawElements(GL_TRIANGLES, m_polygonData.ibo->getCount(), GL_UNSIGNED_INT, nullptr);
 		}
@@ -111,7 +114,7 @@ namespace Seden {
 
 		glfwSwapBuffers(m_window.getWindowPtr());
 
-		DEBUG_CHECK_OPENGL();
+		
 	}
 
 	void Renderer::drawDebugGui() {
@@ -145,5 +148,60 @@ namespace Seden {
 		}
 
 		m_polygonData.vertexOffset += n;
+	}
+
+	struct LetterVertex {
+		glm::vec3 position;
+		glm::vec2 texCoord;
+	};
+
+	void Renderer::drawSimpleText(Comp::Transform& transform, Comp::Text& text)
+	{
+		float x = 0, y = 0;
+		uint32_t i = 0;
+		float scale = 100;
+		float lineSpace = 30;
+		float lineSkip = 0;
+		float center = 0;
+		stbtt_aligned_quad q;
+		char* letter = (char*)text.getText().c_str();
+		while (*letter) {
+			if (*letter == '\n') {
+				lineSkip += lineSpace;
+				center = x;
+			}
+			else if (*letter >= 32 && *letter < 128) {
+				stbtt_GetBakedQuad(m_font->cdata, m_font->texResolution, m_font->texResolution, *letter - 32, &x, &y, &q, 1);
+				//createQuad(q, glm::vec2(-center / scale, lineSkip / scale), i++);
+
+				glm::vec4 pos = glm::vec4(-center / scale, lineSkip / scale,0,1);
+				LetterVertex vertices[4] = {
+					{ transform.getTransform() * (glm::vec4(q.x0, q.y0, 0.f, 0.f) / scale + pos), {q.s0, q.t0} },
+					{ transform.getTransform() * (glm::vec4(q.x1, q.y0, 0.f, 0.f)/scale + pos), {q.s1, q.t0} },
+					{ transform.getTransform() * (glm::vec4(q.x1, q.y1, 0.f, 0.f)/scale + pos), {q.s1, q.t1} },
+					{ transform.getTransform() * (glm::vec4(q.x0, q.y1, 0.f, 0.f)/scale + pos), {q.s0, q.t1} }
+				};
+
+				VertexBuffer vb(4 * sizeof(LetterVertex), (void*)vertices);
+
+				VertexArray va;
+				va.addVertexBuffer(vb, VertexArrayLayout({
+					3, // position
+					2, // texCoord
+					}));
+				m_shader->Bind();
+				m_shader->setMat4("view", m_camera->getView());
+				m_shader->setMat4("proj", m_camera->getProjection());
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, m_font->ftex);
+				m_shader->setInt("uTexture", 0);
+				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			}
+			else {
+				stbtt_GetBakedQuad(m_font->cdata, m_font->texResolution, m_font->texResolution, 127 - 32, &x, &y, &q, 1);
+				//createQuad(q, glm::vec2(-center / scale, lineSkip / scale), i++);
+			}
+			letter++;
+		}
 	}
 }

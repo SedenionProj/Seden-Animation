@@ -6,7 +6,7 @@ namespace Seden {
 	VertexBuffer::VertexBuffer()
 	{
 		glGenBuffers(1, &m_id);
-		glBindBuffer(GL_ARRAY_BUFFER, m_id);
+		bind();
 	}
 	VertexBuffer::VertexBuffer(size_t size, const void* data)
 		: VertexBuffer()

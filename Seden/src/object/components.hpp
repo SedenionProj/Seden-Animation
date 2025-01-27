@@ -7,6 +7,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb_truetype.h>
+#include <array>
 
 namespace Seden {
 
@@ -101,26 +102,21 @@ namespace Seden {
 			glm::mat4 m_projection;
 		};
 
+		class Parent {
+		public:
+			std::shared_ptr<Object> m_parent;
+		};
+
 		class Text {
 		public:
-			struct Vertex {
-				glm::vec2 pos;
-				glm::vec2 texCoords;
-			};
+			Text() : m_text("Sample text."){};
+			explicit Text(std::string text) :m_text(text) {};
 
-			Text();
-			explicit Text(std::string text);
+			void setText(const std::string& text) { m_text = text; };
 
-			void setText(const std::string& text);
-
-			static bool reconstructVB;
+			const std::string& getText() const { return m_text; };
 
 		private:
-			void reloadText();
-			uint32_t ftex = 0;
-			stbtt_bakedchar cdata[96]; // ASCII 32..126
-			int texResolution;
-			std::filesystem::path fontPath;
 			std::string m_text;
 		};
 	}

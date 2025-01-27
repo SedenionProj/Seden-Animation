@@ -7,15 +7,7 @@
 namespace Seden {
 	class Object;
 
-	template<typename T>
-	struct VariableAnimationInfo {
-		T* var;
-		T to;
-		Curve* curve = new EaseInOut(5);
-		float time = 2.f;
-	};
-
-	struct FunctionAnimationInfo {
+	struct TimedAnimationInfo {
 		Animator* anim;
 		Curve* curve = new EaseInOut(5);
 		float time = 2;
@@ -27,7 +19,7 @@ namespace Seden {
 		virtual ~Animation() = default;
 
 		void shiftStart(float sec) {
-			t = -sec;
+			t-=sec;
 		}
 
 		bool finished = false;
@@ -37,52 +29,14 @@ namespace Seden {
 		float prev_f_t = 0;
 	};
 
-	template<typename T>
-	class VariableAnimation : public Animation {
+	class TimedAnimation : public Animation {
 	public:
-		VariableAnimation(T* var, T to, Curve* curve, float time, float shift = 0)
-			: m_var(var), m_from(*var), m_to(to), m_curve(curve), m_time(time) {
-			shiftStart(shift);
-		}
-
-		virtual ~VariableAnimation() {
-			delete m_curve;
-		}
-
-		void update(float dt) override {
-			float step_dt = secondsToStep(dt, m_time);
-			t += step_dt;
-			if (t < 0) return;
-			if (t > 1) finish();
-			else at(t);
-		}
-
-	private:
-		void at(float time) {
-			float f_t = m_curve->get(time);
-			*m_var = (1.f - f_t) * m_from + m_to * f_t;
-		}
-
-		void finish() {
-			finished = true;
-			at(1.f);
-		}
-
-		T* m_var;
-		T m_from;
-		T m_to;
-		Curve* m_curve;
-		float m_time = 2;
-	};
-
-	class FunctionAnimation : public Animation {
-	public:
-		FunctionAnimation(Animator* anim, Curve* curve, float time, float shift = 0)
+		TimedAnimation(Animator* anim, Curve* curve, float time, float shift = 0)
 			: m_anim(anim), m_curve(curve), m_time(time) {
 			shiftStart(shift);
 		}
 
-		virtual ~FunctionAnimation() {
+		virtual ~TimedAnimation() {
 			delete m_anim;
 			delete m_curve;
 		}

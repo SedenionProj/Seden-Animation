@@ -2,11 +2,11 @@
 #include <stdio.h>
 
 #if 1
-	#if defined(SEDEN_VERBOSE)
+	#if 0//defined(SEDEN_VERBOSE)
 		#define DEBUG_ERROR(Message, ...) \
 		    printf("ERROR: " Message " [%s:%d]\n", __FILE__, __LINE__, ##__VA_ARGS__)
 		#define DEBUG_MSG(Message, ...) \
-		    printf("MSG: " Message " [%s:%d]\n", __FILE__, __LINE__, ##__VA_ARGS__)
+		    printf("MESSAGE: " Message " [%s:%d]\n", __FILE__, __LINE__, ##__VA_ARGS__)
 		#define DEBUG_WARNING(Message, ...) \
 		    printf("WARNING: " Message " [%s:%d]\n", __FILE__, __LINE__, ##__VA_ARGS__)
 	#else

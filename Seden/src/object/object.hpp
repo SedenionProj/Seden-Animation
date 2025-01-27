@@ -1,6 +1,7 @@
 #pragma once
 #include <entt/entt.hpp>
 #include <glm/matrix.hpp>
+#include <string>
 #include "src/scene.hpp"
 #include "src/object/components.hpp"
 
@@ -30,6 +31,27 @@ namespace Seden {
 			// todo: maybe add a safety check, or add "getOrCreate" function
 			return m_scene.m_registry.get<T>(m_entity);
 		}
+
+		template<typename T>
+		T& tryGet() {
+			return m_scene.m_registry.try_get<T>(m_entity);
+		}
+
+		/*
+		template<typename T>
+		auto getRecurse(auto(*op)(T&, T&)) {
+			T* comp = tryGet<T>();
+			Comp::Parent* parent = tryGet<Comp::Parent>();
+			auto result = op(comp, par->;
+			while ( par->m_parent)
+			{
+				if()
+			}
+
+			return result;
+		}
+		*/
+
 		template<typename... Args>
 		bool has() {
 			return m_scene.m_registry.all_of<Args...>(m_entity);
@@ -41,10 +63,9 @@ namespace Seden {
 		}
 
 	private:
-		entt::entity m_entity;
 		Scene& m_scene;
+		entt::entity m_entity;
 	};
-
 	class ConvexPolygon : public Object {
 	public:
 		static std::shared_ptr<ConvexPolygon> create(Scene& scene, const std::initializer_list<Comp::PolygonMesh::Vertex> vertices) {
@@ -86,7 +107,7 @@ namespace Seden {
 		    glm::vec3 pos = t.getPosition();
 		
 		    glm::vec3 front = rotation * glm::vec3(0.0f, 0.0f, 1.0f);
-		    glm::vec3 up = rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+		    glm::vec3 up = rotation * glm::vec3(0.0f, -1.0f, 0.0f);
 		
 		    return glm::lookAt(pos, pos + front, up);
 		}
@@ -102,14 +123,15 @@ namespace Seden {
 		}
 	};
 
-	class Text : public Object {
+	class SimpleText : public Object {
 	public:
-		static std::shared_ptr<Text> create(Scene& scene) {
-			return std::make_shared<Text>(scene);
+		static std::shared_ptr<SimpleText> create(Scene& scene, const std::string& text) {
+			return std::make_shared<SimpleText>(scene, text);
 		}
 
-		Text(Scene& scene) : Object(scene) {
+		SimpleText(Scene& scene, const std::string& text) : Object(scene) {
 			add<Comp::Transform>(glm::mat4(1));
+			add<Comp::Text>(text);
 		}
 	};
 }

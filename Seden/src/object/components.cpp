@@ -185,39 +185,7 @@ namespace Seden {
 			return m_projection;
 		}
 
-		// TextComp implementation
-		bool Text::reconstructVB = false;
+		// Text implementation
 
-		Text::Text() : texResolution(2046), fontPath("c:/windows/fonts/times.ttf"), m_text("") {}
-
-		Text::Text(std::string text) : texResolution(2046), fontPath("c:/windows/fonts/times.ttf"), m_text(std::move(text)) {}
-
-		void Text::setText(const std::string& text) {
-			m_text = text;
-			reconstructVB = true;
-		}
-
-		void Text::reloadText() {
-			unsigned char* ttf_buffer = (unsigned char*)malloc(1 << 20);
-			unsigned char* temp_bitmap = (unsigned char*)malloc(texResolution * texResolution);
-
-			FILE* fontFile = fopen(fontPath.string().c_str(), "rb");
-			if (!fontFile) {
-				DEBUG_MSG("Error: Failed to open font file.");
-				return;
-			}
-			fread(ttf_buffer, 1, 1 << 20, fontFile);
-			fclose(fontFile);
-
-			stbtt_BakeFontBitmap(ttf_buffer, 0, 64, temp_bitmap, texResolution, texResolution, 32, 96, cdata);
-			free(ttf_buffer);
-
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glGenTextures(1, &ftex);
-			glBindTexture(GL_TEXTURE_2D, ftex);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, texResolution, texResolution, 0, GL_RED, GL_UNSIGNED_BYTE, temp_bitmap);
-			free(temp_bitmap);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		}
 	}
 }

@@ -25,27 +25,16 @@ namespace Seden {
 
 		void wait(float seconds);
 
-		template<typename T>
-		void animate(VariableAnimationInfo<T> anim);
-
-		void animate(FunctionAnimationInfo anim);
-
-		template<typename Animator, typename... Args>
-		void animGroup(const Comp::GroupObjects& objects, Args&&... args);
-
-		void animAttach(Animator* anim);
-
 		void block() {
 			m_loopSync.block();
 			m_FrameBeginSync.waitUntilUnblocked();
 		}
-
 		void unBlock() {
 			m_loopSync.unBlock();
 		}
 
-		entt::registry& getRegistry() { return m_registry; }
-		std::mutex m_animationsMutex;
+		void anim(Animator* anim, float time = 1, float shift = 0, Curve* curve = new EaseInOut(5));
+		void animAttach(Animator* anim, float shift = 0);
 
 	private:
 		void draw();
@@ -62,19 +51,4 @@ namespace Seden {
 
 		friend class Object;
 	};
-
-	template<typename T>
-	void Scene::animate(VariableAnimationInfo<T> anim) {
-		m_animations.push_back(std::make_unique<VariableAnimation<T>>(anim.var, anim.to, anim.curve, anim.time));
-	}
-
-	template<typename Animator, typename... Args>
-	void Scene::animGroup(const Comp::GroupObjects& objects, Args&&... args)
-	{
-		float shift = 0;
-		for (std::shared_ptr<Object> o : objects) {
-			m_animations.push_back(std::make_unique<FunctionAnimation>(new Animator(o,std::forward<Args>(args)...), new EaseInOut(6), 5.f, shift));
-			shift += 0.1f;
-		}
-	}
 }

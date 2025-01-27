@@ -4,6 +4,7 @@
 namespace Seden {
 	VertexArray::VertexArray() {
 		glGenVertexArrays(1, &m_id);
+		bind();
 	}
 	VertexArray::~VertexArray() {
 		glDeleteVertexArrays(1, &m_id);
@@ -22,11 +23,11 @@ namespace Seden {
 		uint32_t totalCount = 0;
 		uint32_t pos = 0;
 		uint32_t offset = 0;
-
+		
 		for (uint32_t el : layout.getLayout()) {
 			totalCount += el;
 		}
-
+		
 		for (uint32_t el : layout.getLayout()) {
 			glVertexAttribPointer(pos, el, GL_FLOAT, GL_FALSE, totalCount * sizeof(float), (void*)(offset*sizeof(float)));
 			glEnableVertexAttribArray(pos);

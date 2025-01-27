@@ -4,6 +4,7 @@
 #include "src/opengl/buffer.hpp"
 #include "src/opengl/shader.hpp"
 #include "src/window.hpp"
+#include "src/font.hpp"
 
 namespace Seden {
 	class PerspectiveCamera;
@@ -20,7 +21,7 @@ namespace Seden {
 		void drawDebugGui();
 
 		void drawConvexPolygon(Comp::Transform& transform, Comp::PolygonMesh& mesh);
-
+		void drawSimpleText(Comp::Transform& transform, Comp::Text& text);
 	public:
 		struct DebugStats
 		{
@@ -45,6 +46,10 @@ namespace Seden {
 			std::vector<uint32_t> indicesList;
 			uint32_t vertexOffset = 0;
 		};
+
+		// text data
+		std::unique_ptr<Font> m_font;
+		std::unique_ptr<Shader> m_shader;
 
 		PolygonData m_polygonData;
 

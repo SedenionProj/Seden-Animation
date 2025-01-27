@@ -30,6 +30,36 @@ void main(){
 	gl_Position = proj*view*vec4(aPos, 1.0);
 })";
 
+inline const char* letterFragmentShader = R"(#version 330 core
+out vec4 _outFragColor;
+uniform int iFrame;
+uniform sampler2D uTexture;
+in vec3 iFragPos;
+in vec2 iTexCoords;
+void main(){
+	vec4 tex = texture(uTexture, iTexCoords);
+	if(tex.r < 0.1)
+		discard;
+	_outFragColor = vec4(tex);
+})";
+
+inline const char* letterVertexShader = R"(#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoords;
+
+out vec3 iFragPos;
+out vec2 iTexCoords;
+
+uniform mat4 view;
+uniform mat4 proj;
+
+
+void main(){
+	iFragPos = aPos;
+	iTexCoords = aTexCoords;
+	gl_Position = proj*view*vec4(aPos, 1.0);
+})";
+
 namespace Seden {
 	class Shader {
 	public:
