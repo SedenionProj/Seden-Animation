@@ -51,4 +51,5 @@ namespace Seden {
 
 		friend class Object;
 	};
+	extern Scene* s_scene;
 }

@@ -21,7 +21,8 @@ namespace Seden {
 		void drawDebugGui();
 
 		void drawConvexPolygon(Comp::Transform& transform, Comp::PolygonMesh& mesh);
-		void drawSimpleText(Comp::Transform& transform, Comp::Text& text);
+		void drawSimpleText(Comp::Transform& transform, Comp::SimpleText& text);
+		void drawText(Comp::Transform& transform, Comp::GroupObjects& letters, Comp::Text& text);
 	public:
 		struct DebugStats
 		{

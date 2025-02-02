@@ -155,7 +155,7 @@ namespace Seden {
 		glm::vec2 texCoord;
 	};
 
-	void Renderer::drawSimpleText(Comp::Transform& transform, Comp::Text& text)
+	void Renderer::drawSimpleText(Comp::Transform& transform, Comp::SimpleText& text)
 	{
 		float x = 0, y = 0;
 		uint32_t i = 0;
@@ -166,6 +166,7 @@ namespace Seden {
 		stbtt_aligned_quad q;
 		char* letter = (char*)text.getText().c_str();
 		while (*letter) {
+			
 			if (*letter == '\n') {
 				lineSkip += lineSpace;
 				center = x;
@@ -180,6 +181,65 @@ namespace Seden {
 					{ transform.getTransform() * (glm::vec4(q.x1, q.y0, 0.f, 0.f)/scale + pos), {q.s1, q.t0} },
 					{ transform.getTransform() * (glm::vec4(q.x1, q.y1, 0.f, 0.f)/scale + pos), {q.s1, q.t1} },
 					{ transform.getTransform() * (glm::vec4(q.x0, q.y1, 0.f, 0.f)/scale + pos), {q.s0, q.t1} }
+				};
+
+				VertexBuffer vb(4 * sizeof(LetterVertex), (void*)vertices);
+
+				VertexArray va;
+				va.addVertexBuffer(vb, VertexArrayLayout({
+					3, // position
+					2, // texCoord
+					}));
+				m_shader->Bind();
+				m_shader->setMat4("view", m_camera->getView());
+				m_shader->setMat4("proj", m_camera->getProjection());
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, m_font->ftex);
+				m_shader->setInt("uTexture", 0);
+				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+			}
+			else {
+				stbtt_GetBakedQuad(m_font->cdata, m_font->texResolution, m_font->texResolution, 127 - 32, &x, &y, &q, 1);
+				//createQuad(q, glm::vec2(-center / scale, lineSkip / scale), i++);
+			}
+			letter++;
+		}
+	}
+
+	void Renderer::drawText(Comp::Transform& transform, Comp::GroupObjects& letters, Comp::Text& text)
+	{
+		float x = 0, y = 0;
+		uint32_t i = 0;
+		float scale = 100;
+		float lineSpace = 30;
+		float lineSkip = 0;
+		float center = 0;
+		stbtt_aligned_quad q;
+		char* letter = (char*)text.getText().c_str();
+        auto it = letters.begin();
+		while (*letter) {
+			
+			if (*letter == '\n') {
+				lineSkip += lineSpace;
+				center = x;
+			}
+			else if (*letter >= 32 && *letter < 128) {
+				stbtt_GetBakedQuad(m_font->cdata, m_font->texResolution, m_font->texResolution, *letter - 32, &x, &y, &q, 1);
+				//createQuad(q, glm::vec2(-center / scale, lineSkip / scale), i++);
+
+				
+				glm::mat4 model = transform.getTransform()*(*it)->get<Comp::Transform>().getTransform();
+				it++;
+
+				float midx = (q.x1-q.x0) / 2.f;
+				float midy = (q.y1-q.y0) / 2.f;
+				glm::vec4 pos = glm::vec4(-center + q.x0 + midx, lineSkip + q.y0 + midy, 0, 0);
+
+				LetterVertex vertices[4] = {
+					{  (model * glm::vec4(-midx, -midy, 0.f, scale) +pos) / scale   , {q.s0, q.t0} },
+					{  (model * glm::vec4(midx, -midy, 0.f, scale) + pos) / scale   , {q.s1, q.t0} },
+					{  (model * glm::vec4(midx,  midy, 0.f, scale) + pos) / scale   , {q.s1, q.t1} },
+					{  (model * glm::vec4(-midx,  midy, 0.f,scale) + pos) / scale   , {q.s0, q.t1} }
 				};
 
 				VertexBuffer vb(4 * sizeof(LetterVertex), (void*)vertices);

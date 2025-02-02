@@ -2,39 +2,40 @@
 #include <entt/entt.hpp>
 #include <glm/matrix.hpp>
 #include <string>
+
 #include "src/scene.hpp"
 #include "src/object/components.hpp"
 
 namespace Seden {
 	class Object {
 	public:
-		Object(Scene& scene) : m_scene(scene) {
-			m_entity = m_scene.m_registry.create();
+		Object() {
+			m_entity = s_scene->m_registry.create();
 		}
 
-		static std::shared_ptr<Object> create(Scene& scene) {
-			return std::make_shared<Object>(scene);
+		static std::shared_ptr<Object> create() {
+			return std::make_shared<Object>();
 		}
 
 		template<typename T, typename... Args>
 		T& add(Args&&... args) {
-			return m_scene.m_registry.emplace<T>(m_entity, std::forward<Args>(args)...);
+			return s_scene->m_registry.emplace<T>(m_entity, std::forward<Args>(args)...);
 		}
 
 		template<typename T, typename I>
 		T& add(const std::initializer_list<I>& il) {
-			return m_scene.m_registry.emplace<T>(m_entity, il);
+			return s_scene->m_registry.emplace<T>(m_entity, il);
 		}
 
 		template<typename T>
 		T& get() {
 			// todo: maybe add a safety check, or add "getOrCreate" function
-			return m_scene.m_registry.get<T>(m_entity);
+			return s_scene->m_registry.get<T>(m_entity);
 		}
 
 		template<typename T>
 		T& tryGet() {
-			return m_scene.m_registry.try_get<T>(m_entity);
+			return s_scene->m_registry.try_get<T>(m_entity);
 		}
 
 		/*
@@ -54,25 +55,24 @@ namespace Seden {
 
 		template<typename... Args>
 		bool has() {
-			return m_scene.m_registry.all_of<Args...>(m_entity);
+			return s_scene->m_registry.all_of<Args...>(m_entity);
 		}
 
 		template<typename T>
 		void remove() {
-			m_scene.m_registry.remove<T>(m_entity);
+			s_scene->m_registry.remove<T>(m_entity);
 		}
 
 	private:
-		Scene& m_scene;
 		entt::entity m_entity;
 	};
 	class ConvexPolygon : public Object {
 	public:
-		static std::shared_ptr<ConvexPolygon> create(Scene& scene, const std::initializer_list<Comp::PolygonMesh::Vertex> vertices) {
-			return std::make_shared<ConvexPolygon>(scene, vertices);
+		static std::shared_ptr<ConvexPolygon> create(const std::initializer_list<Comp::PolygonMesh::Vertex> vertices) {
+			return std::make_shared<ConvexPolygon>(vertices);
 		}
 
-		ConvexPolygon(Scene& scene, const std::initializer_list<Comp::PolygonMesh::Vertex> vertices) : Object(scene) {
+		ConvexPolygon(const std::initializer_list<Comp::PolygonMesh::Vertex> vertices){
 			add<Comp::Transform>(glm::mat4(1));
 			add<Comp::PolygonMesh, Comp::PolygonMesh::Vertex>(vertices);
 		}
@@ -80,11 +80,11 @@ namespace Seden {
 
 	class Quad : public Object {
 	public: 
-		static std::shared_ptr<Quad> create(Scene& scene) {
-			return std::make_shared<Quad>(scene);
+		static std::shared_ptr<Quad> create() {
+			return std::make_shared<Quad>();
 		}
 
-		Quad(Scene& scene) : Object(scene) {
+		Quad(){
 			add<Comp::Transform>(glm::mat4(1));
 			add<Comp::PolygonMesh, Comp::PolygonMesh::Vertex>({
 				{ glm::vec3(-0.5f, -0.5f,0) }, 
@@ -97,8 +97,8 @@ namespace Seden {
 
 	class PerspectiveCamera : public Object {
 	public:
-		static std::shared_ptr<PerspectiveCamera> create(Scene& scene) {
-			return std::make_shared<PerspectiveCamera>(scene);
+		static std::shared_ptr<PerspectiveCamera> create() {
+			return std::make_shared<PerspectiveCamera>();
 		}
 
 		glm::mat4 getView() {
@@ -116,7 +116,7 @@ namespace Seden {
 			return get<Comp::Perspective>().get();
 		}
 
-		PerspectiveCamera(Scene& scene) : Object(scene) {
+		PerspectiveCamera() {
 			auto& t = add<Comp::Transform>(glm::mat4(1));
 			t.setPosition({ 0, 0, -2 });
 			add<Comp::Perspective>(16.f / 9.f);
@@ -125,13 +125,26 @@ namespace Seden {
 
 	class SimpleText : public Object {
 	public:
-		static std::shared_ptr<SimpleText> create(Scene& scene, const std::string& text) {
-			return std::make_shared<SimpleText>(scene, text);
+		static std::shared_ptr<SimpleText> create(const std::string& text, const glm::vec3& position) {
+			return std::make_shared<SimpleText>(text, position);
 		}
 
-		SimpleText(Scene& scene, const std::string& text) : Object(scene) {
-			add<Comp::Transform>(glm::mat4(1));
-			add<Comp::Text>(text);
+		SimpleText(const std::string& text, const glm::vec3& position) {
+			add<Comp::Transform>(position);
+			add<Comp::SimpleText>(text);
+		}
+	};
+
+	class Text : public Object {
+	public:
+		static std::shared_ptr<Text> create(const std::string& text, const glm::vec3& position) {
+			return std::make_shared<Text>(text, position);
+		}
+
+		Text(const std::string& text, const glm::vec3& position){
+			add<Comp::Transform>(position);
+			auto& group = add<Comp::GroupObjects>();
+			add<Comp::Text>(text, &group);
 		}
 	};
 }

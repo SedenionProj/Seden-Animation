@@ -18,6 +18,7 @@ namespace Seden {
 		public:
 			Transform();
 			explicit Transform(const glm::mat4& transform);
+			explicit Transform(const glm::vec3& position);
 
 			operator glm::mat4& ();
 			operator const glm::mat4& () const;
@@ -77,7 +78,7 @@ namespace Seden {
 			GroupObjects(GroupObjects&& other) noexcept;
 			GroupObjects(const GroupObjects&) = delete;
 
-			void addObject(const std::shared_ptr<Object>& object);
+			std::shared_ptr<Object> addObject(std::shared_ptr<Object> object);
 			void removeObject(size_t index);
 			std::shared_ptr<Object> getObject(size_t index) const;
 			size_t size() const;
@@ -107,10 +108,10 @@ namespace Seden {
 			std::shared_ptr<Object> m_parent;
 		};
 
-		class Text {
+		class SimpleText {
 		public:
-			Text() : m_text("Sample text."){};
-			explicit Text(std::string text) :m_text(text) {};
+			SimpleText() : m_text("Sample text."){};
+			explicit SimpleText(std::string text) :m_text(text) {};
 
 			void setText(const std::string& text) { m_text = text; };
 
@@ -118,6 +119,22 @@ namespace Seden {
 
 		private:
 			std::string m_text;
+		};
+
+		class Text {
+		public:
+			Text() : m_text("Sample text."){};
+			explicit Text(std::string text, Comp::GroupObjects* letters);
+
+			void setText(const std::string& text) { m_text = text; };
+
+			const std::string& getText() const { return m_text; };
+
+			void reloadText();
+
+		private:
+			std::string m_text;
+			Comp::GroupObjects* m_letters;
 		};
 	}
 }

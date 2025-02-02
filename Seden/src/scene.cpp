@@ -85,8 +85,12 @@ namespace Seden {
 			}
 		});
 
-		m_registry.view<Comp::Transform, Comp::Text>().each([this](const auto object, auto& transform, auto& text) {
+		m_registry.view<Comp::Transform, Comp::SimpleText>().each([this](const auto object, auto& transform, auto& text) {
 			m_renderer.drawSimpleText(transform, text);
+		});
+
+		m_registry.view<Comp::Transform, Comp::GroupObjects, Comp::Text>().each([this](const auto object, auto& transform, auto& letters, auto& text) {
+			m_renderer.drawText(transform, letters, text);
 		});
 	}
 

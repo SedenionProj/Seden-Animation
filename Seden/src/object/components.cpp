@@ -1,12 +1,12 @@
-#define STB_TRUETYPE_IMPLEMENTATION
-#include "src/object/components.hpp"
-#include "src/logger.h"
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glad/glad.h>
+
+#include "src/object/components.hpp"
+#include "src/logger.h"
+#include "src/object/object.hpp"
 
 namespace Seden {
 	namespace Comp {
@@ -14,6 +14,11 @@ namespace Seden {
 		Transform::Transform() : m_transform(glm::mat4(1.0f)) {}
 
 		Transform::Transform(const glm::mat4& transform) : m_transform(transform) {}
+
+		Transform::Transform(const glm::vec3& position)
+			: Transform() {
+			setPosition(position);
+		}
 
 		Transform::operator glm::mat4& () {
 			return m_transform;
@@ -146,8 +151,9 @@ namespace Seden {
 
 		GroupObjects::GroupObjects(GroupObjects&& other) noexcept : m_objects(std::move(other.m_objects)) {}
 
-		void GroupObjects::addObject(const std::shared_ptr<Object>& object) {
+		std::shared_ptr<Object> GroupObjects::addObject(std::shared_ptr<Object> object) {
 			m_objects.push_back(object);
+			return object;
 		}
 
 		void GroupObjects::removeObject(size_t index) {
@@ -185,7 +191,19 @@ namespace Seden {
 			return m_projection;
 		}
 
-		// Text implementation
+		Text::Text(std::string text, Comp::GroupObjects* letters)
+			:m_text(text), m_letters(letters) {
+			reloadText();
+		};
 
+		// Text implementation
+		void Text::reloadText() {
+			m_letters->clear();
+			for (char c : m_text) {
+				auto obj = Object::create();
+				obj->add<Comp::Transform>(glm::mat4(1));
+				m_letters->addObject(obj);
+			}
+		}
 	}
 }
