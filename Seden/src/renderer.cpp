@@ -1,5 +1,4 @@
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -32,6 +31,10 @@ namespace Seden {
 
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(MessageCallback, 0);
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		m_polygonData.vao= std::make_unique<VertexArray>();
 		m_polygonData.ibo = std::make_unique<IndexBuffer>();
@@ -109,12 +112,13 @@ namespace Seden {
 			m_polygonData.vao->bind();
 			glDrawElements(GL_TRIANGLES, m_polygonData.ibo->getCount(), GL_UNSIGNED_INT, nullptr);
 		}
+
+		m_window.saveFrame();
+
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		glfwSwapBuffers(m_window.getWindowPtr());
-
-		
+		m_window.swapBuffers();
 	}
 
 	void Renderer::drawDebugGui() {
@@ -151,60 +155,10 @@ namespace Seden {
 	}
 
 	struct LetterVertex {
+		glm::vec4 color;
 		glm::vec3 position;
 		glm::vec2 texCoord;
 	};
-
-	void Renderer::drawSimpleText(Comp::Transform& transform, Comp::SimpleText& text)
-	{
-		float x = 0, y = 0;
-		uint32_t i = 0;
-		float scale = 100;
-		float lineSpace = 30;
-		float lineSkip = 0;
-		float center = 0;
-		stbtt_aligned_quad q;
-		char* letter = (char*)text.getText().c_str();
-		while (*letter) {
-			
-			if (*letter == '\n') {
-				lineSkip += lineSpace;
-				center = x;
-			}
-			else if (*letter >= 32 && *letter < 128) {
-				stbtt_GetBakedQuad(m_font->cdata, m_font->texResolution, m_font->texResolution, *letter - 32, &x, &y, &q, 1);
-				//createQuad(q, glm::vec2(-center / scale, lineSkip / scale), i++);
-
-				glm::vec4 pos = glm::vec4(-center / scale, lineSkip / scale,0,1);
-				LetterVertex vertices[4] = {
-					{ transform.getTransform() * (glm::vec4(q.x0, q.y0, 0.f, 0.f) / scale + pos), {q.s0, q.t0} },
-					{ transform.getTransform() * (glm::vec4(q.x1, q.y0, 0.f, 0.f)/scale + pos), {q.s1, q.t0} },
-					{ transform.getTransform() * (glm::vec4(q.x1, q.y1, 0.f, 0.f)/scale + pos), {q.s1, q.t1} },
-					{ transform.getTransform() * (glm::vec4(q.x0, q.y1, 0.f, 0.f)/scale + pos), {q.s0, q.t1} }
-				};
-
-				VertexBuffer vb(4 * sizeof(LetterVertex), (void*)vertices);
-
-				VertexArray va;
-				va.addVertexBuffer(vb, VertexArrayLayout({
-					3, // position
-					2, // texCoord
-					}));
-				m_shader->Bind();
-				m_shader->setMat4("view", m_camera->getView());
-				m_shader->setMat4("proj", m_camera->getProjection());
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, m_font->ftex);
-				m_shader->setInt("uTexture", 0);
-				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			}
-			else {
-				stbtt_GetBakedQuad(m_font->cdata, m_font->texResolution, m_font->texResolution, 127 - 32, &x, &y, &q, 1);
-				//createQuad(q, glm::vec2(-center / scale, lineSkip / scale), i++);
-			}
-			letter++;
-		}
-	}
 
 	void Renderer::drawText(Comp::Transform& transform, Comp::GroupObjects& letters, Comp::Text& text)
 	{
@@ -223,29 +177,30 @@ namespace Seden {
 				lineSkip += lineSpace;
 				center = x;
 			}
-			else if (*letter >= 32 && *letter < 128) {
+			else if (*letter == ' ') {
 				stbtt_GetBakedQuad(m_font->cdata, m_font->texResolution, m_font->texResolution, *letter - 32, &x, &y, &q, 1);
-				//createQuad(q, glm::vec2(-center / scale, lineSkip / scale), i++);
-
+			} else if (*letter >= 32 && *letter < 128) {
+				stbtt_GetBakedQuad(m_font->cdata, m_font->texResolution, m_font->texResolution, *letter - 32, &x, &y, &q, 1);
 				
 				glm::mat4 model = transform.getTransform()*(*it)->get<Comp::Transform>().getTransform();
-				it++;
+				
 
 				float midx = (q.x1-q.x0) / 2.f;
 				float midy = (q.y1-q.y0) / 2.f;
 				glm::vec4 pos = glm::vec4(-center + q.x0 + midx, lineSkip + q.y0 + midy, 0, 0);
-
+				auto& col = (*it)->get<Comp::Color>();
 				LetterVertex vertices[4] = {
-					{  (model * glm::vec4(-midx, -midy, 0.f, scale) +pos) / scale   , {q.s0, q.t0} },
-					{  (model * glm::vec4(midx, -midy, 0.f, scale) + pos) / scale   , {q.s1, q.t0} },
-					{  (model * glm::vec4(midx,  midy, 0.f, scale) + pos) / scale   , {q.s1, q.t1} },
-					{  (model * glm::vec4(-midx,  midy, 0.f,scale) + pos) / scale   , {q.s0, q.t1} }
+					{ col.m_color, (model * glm::vec4(-midx, -midy, 0.f, scale) +pos) / scale, {q.s0, q.t0} },
+					{ col.m_color, (model * glm::vec4(midx, -midy, 0.f, scale) + pos) / scale, {q.s1, q.t0} },
+					{ col.m_color, (model * glm::vec4(midx,  midy, 0.f, scale) + pos) / scale, {q.s1, q.t1} },
+					{ col.m_color, (model * glm::vec4(-midx,  midy, 0.f,scale) + pos) / scale, {q.s0, q.t1} }
 				};
 
 				VertexBuffer vb(4 * sizeof(LetterVertex), (void*)vertices);
 
 				VertexArray va;
 				va.addVertexBuffer(vb, VertexArrayLayout({
+					4, // color
 					3, // position
 					2, // texCoord
 					}));
@@ -256,6 +211,7 @@ namespace Seden {
 				glBindTexture(GL_TEXTURE_2D, m_font->ftex);
 				m_shader->setInt("uTexture", 0);
 				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+				it++;
 			}
 			else {
 				stbtt_GetBakedQuad(m_font->cdata, m_font->texResolution, m_font->texResolution, 127 - 32, &x, &y, &q, 1);

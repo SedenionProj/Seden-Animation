@@ -4,11 +4,12 @@
 
 namespace Seden {
 	void Scene::wait(float seconds) {
-		Clock clock;
-		for (float i = 0.f; i < seconds; i += clock.getElapsedTimeAndReset()) {
-			std::this_thread::sleep_for(std::chrono::microseconds(10));
+		m_waiting = true;
+		while (m_waitTime < seconds) {
 			if(!m_window.isRunning()) break;
 		}
+		m_waiting = false;
+		m_waitTime = 0;
 	}
 
 	void Scene::setCamera(std::shared_ptr<PerspectiveCamera> camera)
@@ -29,13 +30,17 @@ namespace Seden {
 	void Scene::startAnimationLoop()
 	{
 		Clock clock;
-
 		while (m_window.isRunning()) {
-			m_loopSync.waitUntilUnblocked();
-			m_FrameBeginSync.block();
+			m_waitSync.waitUntilUnblocked();
+			m_loopSync.block();
 
 			bool hasAnimToRemove = false;
-			float dt = clock.getElapsedTimeAndReset();
+			float dt = m_window.isRecording() ? 1.f/m_window.getFrameRate() : clock.getElapsedTimeAndReset();
+
+			if (m_waiting) {
+				m_waitTime += dt;
+			}
+
 			for (auto& anim : m_animations) {
 				anim->update(dt);
 				if (anim->finished)
@@ -60,7 +65,7 @@ namespace Seden {
 			draw();
 			m_renderer.endFrame();
 
-			m_FrameBeginSync.unBlock();
+			m_loopSync.unBlock();
 			
 		}
 		DEBUG_MSG("end of animation loop");
@@ -71,7 +76,7 @@ namespace Seden {
 		m_renderer.drawDebugGui();
 
 		m_registry.view<Comp::Transform, Comp::PolygonMesh>().each([this](const auto object, auto& transform, auto& mesh) {
-			if (Comp::Parent* comp = m_registry.try_get<Comp::Parent>(object); comp && comp->m_parent) { // analyze ";"
+			if (Comp::Parent* comp = m_registry.try_get<Comp::Parent>(object); comp && comp->m_parent) {
 				//todo, use group
 				//glm::mat4 result = comp->m_parent->getRecurse<Comp::Transform>(
 				//	[](Comp::Transform& a, Comp::Transform& b) -> glm::mat4 {
@@ -83,10 +88,6 @@ namespace Seden {
 			else {
 				m_renderer.drawConvexPolygon(transform, mesh);
 			}
-		});
-
-		m_registry.view<Comp::Transform, Comp::SimpleText>().each([this](const auto object, auto& transform, auto& text) {
-			m_renderer.drawSimpleText(transform, text);
 		});
 
 		m_registry.view<Comp::Transform, Comp::GroupObjects, Comp::Text>().each([this](const auto object, auto& transform, auto& letters, auto& text) {

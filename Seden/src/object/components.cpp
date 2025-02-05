@@ -199,9 +199,13 @@ namespace Seden {
 		// Text implementation
 		void Text::reloadText() {
 			m_letters->clear();
+			m_length = 0;
 			for (char c : m_text) {
+                if (!(32 <= c && c < 128 || c == ' ')) continue;
+				m_length++;
 				auto obj = Object::create();
 				obj->add<Comp::Transform>(glm::mat4(1));
+				obj->add<Comp::Color>(glm::vec4(1));
 				m_letters->addObject(obj);
 			}
 		}

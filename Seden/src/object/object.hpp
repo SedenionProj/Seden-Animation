@@ -123,18 +123,6 @@ namespace Seden {
 		}
 	};
 
-	class SimpleText : public Object {
-	public:
-		static std::shared_ptr<SimpleText> create(const std::string& text, const glm::vec3& position) {
-			return std::make_shared<SimpleText>(text, position);
-		}
-
-		SimpleText(const std::string& text, const glm::vec3& position) {
-			add<Comp::Transform>(position);
-			add<Comp::SimpleText>(text);
-		}
-	};
-
 	class Text : public Object {
 	public:
 		static std::shared_ptr<Text> create(const std::string& text, const glm::vec3& position) {

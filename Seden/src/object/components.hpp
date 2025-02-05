@@ -108,33 +108,30 @@ namespace Seden {
 			std::shared_ptr<Object> m_parent;
 		};
 
-		class SimpleText {
+		class Color {
 		public:
-			SimpleText() : m_text("Sample text."){};
-			explicit SimpleText(std::string text) :m_text(text) {};
+			Color(const glm::vec4& color) 
+				: m_color(color){}
 
-			void setText(const std::string& text) { m_text = text; };
-
-			const std::string& getText() const { return m_text; };
-
-		private:
-			std::string m_text;
+			glm::vec4 m_color;
 		};
 
 		class Text {
 		public:
-			Text() : m_text("Sample text."){};
 			explicit Text(std::string text, Comp::GroupObjects* letters);
 
-			void setText(const std::string& text) { m_text = text; };
+			void setText(const std::string& text) { m_text = text; reloadText(); };
 
 			const std::string& getText() const { return m_text; };
+			uint32_t getLength() const { return m_length; }
 
 			void reloadText();
 
 		private:
+			uint32_t m_length;
 			std::string m_text;
 			Comp::GroupObjects* m_letters;
 		};
+
 	}
 }

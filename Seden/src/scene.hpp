@@ -26,11 +26,11 @@ namespace Seden {
 		void wait(float seconds);
 
 		void block() {
-			m_loopSync.block();
-			m_FrameBeginSync.waitUntilUnblocked();
+			m_waitSync.block();
+			m_loopSync.waitUntilUnblocked();
 		}
 		void unBlock() {
-			m_loopSync.unBlock();
+			m_waitSync.unBlock();
 		}
 
 		void anim(Animator* anim, float time = 1, float shift = 0, Curve* curve = new EaseInOut(5));
@@ -40,12 +40,15 @@ namespace Seden {
 		void draw();
 
 	private:
+
 		entt::registry m_registry;
 		Window& m_window;
 		Renderer m_renderer{m_window};
 
-		Sync m_loopSync;
-		Sync m_FrameBeginSync;
+		Sync m_waitSync;
+		Sync m_loopSync;		 
+		bool m_waiting = false;
+		float m_waitTime = 0;
 
 		std::vector<std::unique_ptr<Animation>> m_animations;
 
