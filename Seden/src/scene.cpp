@@ -12,7 +12,7 @@ namespace Seden {
 		m_waitTime = 0;
 	}
 
-	void Scene::setCamera(std::shared_ptr<PerspectiveCamera> camera)
+	void Scene::setCamera(std::shared_ptr<Camera> camera)
 	{
 		m_renderer.setCamera(camera);
 	}
@@ -36,7 +36,7 @@ namespace Seden {
 
 			bool hasAnimToRemove = false;
 			float dt = m_window.isRecording() ? 1.f/m_window.getFrameRate() : clock.getElapsedTimeAndReset();
-
+			dt *= m_animationSpeed;
 			if (m_waiting) {
 				m_waitTime += dt;
 			}
@@ -92,6 +92,10 @@ namespace Seden {
 
 		m_registry.view<Comp::Transform, Comp::GroupObjects, Comp::Text>().each([this](const auto object, auto& transform, auto& letters, auto& text) {
 			m_renderer.drawText(transform, letters, text);
+		});
+
+		m_registry.view<Comp::Transform, Comp::Color, Comp::Point>().each([this](const auto object, auto& transform, auto& color, auto& point) {
+			m_renderer.drawPoint(transform, color, point);
 		});
 	}
 

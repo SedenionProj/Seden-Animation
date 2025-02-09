@@ -103,6 +103,17 @@ namespace Seden {
 			glm::mat4 m_projection;
 		};
 
+		class Orthographic {
+		public:
+			explicit Orthographic(float aspectRatio);
+			explicit Orthographic(float left, float right, float bottom, float top);
+
+			glm::mat4& get();
+
+		private:
+			glm::mat4 m_projection;
+		};
+
 		class Parent {
 		public:
 			std::shared_ptr<Object> m_parent;
@@ -118,20 +129,32 @@ namespace Seden {
 
 		class Text {
 		public:
-			explicit Text(std::string text, Comp::GroupObjects* letters);
+			explicit Text(std::string text, Comp::GroupObjects* letters, float scale);
 
 			void setText(const std::string& text) { m_text = text; reloadText(); };
 
 			const std::string& getText() const { return m_text; };
-			uint32_t getLength() const { return m_length; }
+			uint32_t getLength() const { return m_letters->size(); }
 
 			void reloadText();
 
+			float& getScale() {
+				return m_scale;
+			}
+
 		private:
-			uint32_t m_length;
+			float m_scale;
 			std::string m_text;
 			Comp::GroupObjects* m_letters;
 		};
 
+		class Point {
+		public:
+			explicit Point(float thickness);
+			~Point();
+			float m_thickness;
+			static bool hasVertexCountChanged;
+			static size_t totalVertexCount;
+		};
 	}
 }

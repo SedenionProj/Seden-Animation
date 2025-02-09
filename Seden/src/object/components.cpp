@@ -191,23 +191,45 @@ namespace Seden {
 			return m_projection;
 		}
 
-		Text::Text(std::string text, Comp::GroupObjects* letters)
-			:m_text(text), m_letters(letters) {
+		// Orthographic implementation
+		Orthographic::Orthographic(float aspectRatio) : m_projection(glm::ortho(-aspectRatio,aspectRatio, -1.f,1.f,-1.f,1.f)) {}
+
+		Orthographic::Orthographic(float left, float right, float bottom, float top) : m_projection(glm::ortho(left, right, bottom, top, -1.f, 1.f)) {}
+
+		glm::mat4& Orthographic::get() {
+			return m_projection;
+		}
+
+
+		Text::Text(std::string text, Comp::GroupObjects* letters, float scale)
+			:m_text(text), m_letters(letters), m_scale(scale) {
 			reloadText();
 		};
 
 		// Text implementation
 		void Text::reloadText() {
 			m_letters->clear();
-			m_length = 0;
 			for (char c : m_text) {
-                if (!(32 <= c && c < 128 || c == ' ')) continue;
-				m_length++;
+                if (!(32 <= c && c < 128 && c != ' ')) continue;
 				auto obj = Object::create();
 				obj->add<Comp::Transform>(glm::mat4(1));
 				obj->add<Comp::Color>(glm::vec4(1));
 				m_letters->addObject(obj);
 			}
+		}
+
+		size_t Point::totalVertexCount = 0;
+		bool Point::hasVertexCountChanged = false;
+
+		Point::Point(float thickness) 
+			: m_thickness(thickness) {
+			totalVertexCount += 1;
+			hasVertexCountChanged = true;
+		}
+
+		Point::~Point() {
+			totalVertexCount -= 1;
+			hasVertexCountChanged = true;
 		}
 	}
 }

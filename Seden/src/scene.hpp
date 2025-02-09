@@ -13,7 +13,7 @@
 #include "src/util/sync.h"
 
 namespace Seden {
-	class PerspectiveCamera;
+	class Camera;
 
 	class Scene {
 	public:
@@ -21,7 +21,7 @@ namespace Seden {
 
 		void startAnimationLoop();
 
-		void setCamera(std::shared_ptr<PerspectiveCamera> camera);
+		void setCamera(std::shared_ptr<Camera> camera);
 
 		void wait(float seconds);
 
@@ -35,6 +35,8 @@ namespace Seden {
 
 		void anim(Animator* anim, float time = 1, float shift = 0, Curve* curve = new EaseInOut(5));
 		void animAttach(Animator* anim, float shift = 0);
+
+		float m_animationSpeed = 1;
 
 	private:
 		void draw();

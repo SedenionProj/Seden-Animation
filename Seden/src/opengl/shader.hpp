@@ -39,6 +39,7 @@ in vec3 iFragPos;
 in vec2 iTexCoords;
 void main(){
 	float tex = texture(uTexture, iTexCoords).r;
+	if(tex<0.2||iColor.a<0.05) discard;
 	_outFragColor = vec4(tex)*iColor;
 })";
 
@@ -60,6 +61,33 @@ void main(){
 	iFragPos = aPos;
 	iTexCoords = aTexCoords;
 	gl_Position = proj*view*vec4(aPos, 1.0);
+})";
+
+inline const char* pointFragmentShader = R"(#version 330 core
+out vec4 _outFragColor;
+in vec4 iColor;
+
+void main(){
+	_outFragColor = iColor;
+})";
+
+inline const char* pointVertexShader = R"(#version 330 core
+layout (location = 0) in vec4 aColor;
+layout (location = 1) in vec3 aPos;
+layout (location = 2) in float aThickness;
+
+out vec4 iColor;
+out vec3 iFragPos;
+
+uniform mat4 view;
+uniform mat4 proj;
+
+
+void main(){
+	iColor = aColor;
+	iFragPos = aPos;
+	gl_Position = proj*view*vec4(aPos, 1.0);
+	gl_PointSize = aThickness;
 })";
 
 namespace Seden {

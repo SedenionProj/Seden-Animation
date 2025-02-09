@@ -27,7 +27,7 @@ namespace Seden {
 		fread(ttf_buffer, 1, 1 << 20, fontFile);
 		fclose(fontFile);
 
-		stbtt_BakeFontBitmap(ttf_buffer, 0, 64, temp_bitmap, texResolution, texResolution, 32, 96, cdata);
+		stbtt_BakeFontBitmap(ttf_buffer, 0, fontSize, temp_bitmap, texResolution, texResolution, 32, 96, cdata);
 		free(ttf_buffer);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 

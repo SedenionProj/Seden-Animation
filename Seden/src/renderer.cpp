@@ -34,6 +34,7 @@ namespace Seden {
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
+		glEnable(GL_PROGRAM_POINT_SIZE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		m_polygonData.vao= std::make_unique<VertexArray>();
@@ -50,6 +51,18 @@ namespace Seden {
 		m_shader->createShader(letterVertexShader, letterFragmentShader);
 
 		m_font = std::make_unique<Font>();
+
+
+
+		m_pointData.vao = std::make_unique<VertexArray>();
+		m_pointData.vbo = std::make_unique<VertexBuffer>();
+		m_pointData.shader = std::make_unique<Shader>();
+		m_pointData.shader->createShader(pointVertexShader, pointFragmentShader);
+		m_pointData.vao->addVertexBuffer(*m_pointData.vbo, VertexArrayLayout({
+			4, // color
+			3, // position
+			1, // thickness
+			}));
 	}
 
 	Renderer::~Renderer()
@@ -59,7 +72,7 @@ namespace Seden {
 		ImGui::DestroyContext();
 	}
 
-	void Renderer::setCamera(std::shared_ptr<PerspectiveCamera> camera)
+	void Renderer::setCamera(std::shared_ptr<Camera> camera)
 	{
 		m_camera = camera;
 	}
@@ -93,6 +106,10 @@ namespace Seden {
 			m_polygonData.indicesList.reserve(Comp::PolygonMesh::totalVertexCount);
 			m_polygonData.verticesList.resize(Comp::PolygonMesh::totalVertexCount);
 		}
+
+		if (Comp::Point::hasVertexCountChanged) {
+			m_pointData.verticesList.resize(Comp::Point::totalVertexCount);
+		}
 	}
 
 	void Renderer::endFrame()
@@ -111,6 +128,21 @@ namespace Seden {
 		
 			m_polygonData.vao->bind();
 			glDrawElements(GL_TRIANGLES, m_polygonData.ibo->getCount(), GL_UNSIGNED_INT, nullptr);
+		}
+
+		if (Comp::Point::totalVertexCount) {
+			if (Comp::Point::hasVertexCountChanged) {
+				Comp::Point::hasVertexCountChanged = false;
+			}
+			m_pointData.vbo->setData(Comp::Point::totalVertexCount * sizeof(PointVertex), m_pointData.verticesList.data());
+
+			m_pointData.vertexOffset = 0;
+			m_pointData.shader->Bind();
+			m_pointData.shader->setMat4("view", m_camera->getView());
+			m_pointData.shader->setMat4("proj", m_camera->getProjection());
+
+			m_pointData.vao->bind();
+			glDrawArrays(GL_POINTS, 0, Comp::Point::totalVertexCount);
 		}
 
 		m_window.saveFrame();
@@ -164,8 +196,8 @@ namespace Seden {
 	{
 		float x = 0, y = 0;
 		uint32_t i = 0;
-		float scale = 100;
-		float lineSpace = 30;
+		float scale = m_font->fontSize/text.getScale();
+		float lineSpace = 1;
 		float lineSkip = 0;
 		float center = 0;
 		stbtt_aligned_quad q;
@@ -219,5 +251,14 @@ namespace Seden {
 			}
 			letter++;
 		}
+	}
+
+
+
+	void Renderer::drawPoint(Comp::Transform& transform, Comp::Color& color, Comp::Point& point)
+	{
+		Comp::Point::totalVertexCount;
+		m_pointData.verticesList[m_pointData.vertexOffset] = { color.m_color,transform.getPosition(), point.m_thickness };
+		m_pointData.vertexOffset++;
 	}
 }

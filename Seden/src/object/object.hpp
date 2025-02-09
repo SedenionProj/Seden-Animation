@@ -95,13 +95,19 @@ namespace Seden {
 		}
 	};
 
-	class PerspectiveCamera : public Object {
+	class Camera : public Object {
+	public:
+		virtual glm::mat4 getView() = 0;
+		virtual glm::mat4& getProjection() = 0;
+	};
+
+	class PerspectiveCamera : public Camera {
 	public:
 		static std::shared_ptr<PerspectiveCamera> create() {
 			return std::make_shared<PerspectiveCamera>();
 		}
 
-		glm::mat4 getView() {
+		glm::mat4 getView() override  {
 		    auto& t = get<Comp::Transform>();
 		    glm::quat rotation = t.getRotation();
 		    glm::vec3 pos = t.getPosition();
@@ -112,7 +118,7 @@ namespace Seden {
 		    return glm::lookAt(pos, pos + front, up);
 		}
 
-		glm::mat4& getProjection() {
+		glm::mat4& getProjection() override {
 			return get<Comp::Perspective>().get();
 		}
 
@@ -123,16 +129,59 @@ namespace Seden {
 		}
 	};
 
-	class Text : public Object {
+	class OrthographicCamera : public Camera {
 	public:
-		static std::shared_ptr<Text> create(const std::string& text, const glm::vec3& position) {
-			return std::make_shared<Text>(text, position);
+		static std::shared_ptr<OrthographicCamera> create() {
+			return std::make_shared<OrthographicCamera>();
 		}
 
-		Text(const std::string& text, const glm::vec3& position){
+		static std::shared_ptr<OrthographicCamera> create(float left, float right, float bottom, float top) {
+			return std::make_shared<OrthographicCamera>(left, right, bottom, top);
+		}
+
+		glm::mat4 getView() override {
+			auto& t = get<Comp::Transform>();
+
+			return glm::inverse(t.getTransform());
+		}
+
+		glm::mat4& getProjection() override {
+			return get<Comp::Orthographic>().get();
+		}
+
+		OrthographicCamera() {
+			auto& t = add<Comp::Transform>(glm::mat4(1));
+			add<Comp::Orthographic>(16.f / 9.f);
+		}
+
+		OrthographicCamera(float left, float right, float bottom, float top) {
+			auto& t = add<Comp::Transform>(glm::mat4(1));
+			add<Comp::Orthographic>(left, right, bottom, top);
+		}
+	};
+
+	class Text : public Object {
+	public:
+		static std::shared_ptr<Text> create(const std::string& text, const glm::vec3& position, float scale) {
+			return std::make_shared<Text>(text, position, scale);
+		}
+
+		Text(const std::string& text, const glm::vec3& position, float scale){
 			add<Comp::Transform>(position);
 			auto& group = add<Comp::GroupObjects>();
-			add<Comp::Text>(text, &group);
+			add<Comp::Text>(text, &group, scale);
+		}
+	};
+
+	class Point : public Object {
+	public:
+		static std::shared_ptr<Point> create(float thickness) {
+			return std::make_shared<Point>(thickness);
+		}
+		Point(float thickness) {
+			add<Comp::Transform>();
+			add<Comp::Color>(glm::vec4(1));
+			add<Comp::Point>(thickness);
 		}
 	};
 }

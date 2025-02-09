@@ -7,14 +7,20 @@
 #include "src/font.hpp"
 
 namespace Seden {
-	class PerspectiveCamera;
+	class Camera;
+
+	struct PointVertex {
+		glm::vec4 color;
+		glm::vec3 position;
+		float thickness;
+	};
 
 	class Renderer {
 	public:
 		Renderer(Window& window);
 		~Renderer();
 
-		void setCamera(std::shared_ptr<PerspectiveCamera> camera);
+		void setCamera(std::shared_ptr<Camera> camera);
 
 		void beginFrame();
 		void endFrame();
@@ -22,6 +28,7 @@ namespace Seden {
 
 		void drawConvexPolygon(Comp::Transform& transform, Comp::PolygonMesh& mesh);
 		void drawText(Comp::Transform& transform, Comp::GroupObjects& letters, Comp::Text& text);
+		void drawPoint(Comp::Transform& transform, Comp::Color& color, Comp::Point& point);
 	public:
 		struct DebugStats
 		{
@@ -36,8 +43,7 @@ namespace Seden {
 		void initImgui();
 
 	private:
-		struct PolygonData
-		{
+		struct PolygonData {
 			std::unique_ptr<VertexBuffer> vbo;
 			std::unique_ptr<VertexArray>  vao;
 			std::unique_ptr<IndexBuffer>  ibo;
@@ -47,15 +53,25 @@ namespace Seden {
 			uint32_t vertexOffset = 0;
 		};
 
+		struct PointData {
+			std::unique_ptr<VertexBuffer> vbo;
+			std::unique_ptr<VertexArray>  vao;
+			std::unique_ptr<Shader> shader;
+			std::vector<PointVertex> verticesList;
+			uint32_t vertexOffset = 0;
+		};
+
 		// text data
 		std::unique_ptr<Font> m_font;
 		std::unique_ptr<Shader> m_shader;
+		std::unique_ptr<Shader> m_shaderPoint;
 
 		PolygonData m_polygonData;
+		PointData m_pointData;
 
 		
 
-		std::shared_ptr<PerspectiveCamera> m_camera;
+		std::shared_ptr<Camera> m_camera;
 		Window& m_window;
 	};
 }
