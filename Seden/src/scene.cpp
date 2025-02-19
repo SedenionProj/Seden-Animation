@@ -6,7 +6,7 @@ namespace Seden {
 	void Scene::wait(float seconds) {
 		m_waiting = true;
 		while (m_waitTime < seconds) {
-			if(!m_window.isRunning()) break;
+			if(!m_window->isRunning()) break;
 		}
 		m_waiting = false;
 		m_waitTime = 0;
@@ -30,12 +30,12 @@ namespace Seden {
 	void Scene::startAnimationLoop()
 	{
 		Clock clock;
-		while (m_window.isRunning()) {
+		while (m_window->isRunning()) {
 			m_waitSync.waitUntilUnblocked();
 			m_loopSync.block();
 
 			bool hasAnimToRemove = false;
-			float dt = m_window.isRecording() ? 1.f/m_window.getFrameRate() : clock.getElapsedTimeAndReset();
+			float dt = m_window->isRecording() ? 1.f/m_window->getFrameRate() : clock.getElapsedTimeAndReset();
 			dt *= m_animationSpeed;
 			if (m_waiting) {
 				m_waitTime += dt;

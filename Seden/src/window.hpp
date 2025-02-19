@@ -5,8 +5,12 @@
 namespace Seden {
 	class Window {
 	public:
-		Window(uint32_t width = 1280, uint32_t height = 720, const char* name = "application")
-			: m_width(width), m_height(height) {
+		Window() {};
+
+		void create(uint32_t width = 1280, uint32_t height = 720, const char* name = "application") {
+			m_width = width;
+			m_height = height;
+
 			glfwInit();
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -66,9 +70,9 @@ namespace Seden {
 		GLFWwindow* getWindowPtr() { return m_window; }
 
 	private:
-		uint32_t m_frameRate;
-		uint32_t m_width;
-		uint32_t m_height;
+		uint32_t m_frameRate = 0;
+		uint32_t m_width = 0;
+		uint32_t m_height = 0;
 		bool m_isRecording = false;
 		std::unique_ptr<int[]> m_image;
 		FILE* ffmpeg = nullptr;

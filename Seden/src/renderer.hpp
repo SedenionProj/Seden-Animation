@@ -17,7 +17,8 @@ namespace Seden {
 
 	class Renderer {
 	public:
-		Renderer(Window& window);
+		Renderer() = default;
+		void init(Window* window);
 		~Renderer();
 
 		void setCamera(std::shared_ptr<Camera> camera);
@@ -72,6 +73,6 @@ namespace Seden {
 		
 
 		std::shared_ptr<Camera> m_camera;
-		Window& m_window;
+		Window* m_window;
 	};
 }

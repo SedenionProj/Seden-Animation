@@ -22,9 +22,9 @@ namespace Seden {
 			type, severity, message);
 	}
 
-	Renderer::Renderer(Window& window)
-		:m_window(window)
+	void Renderer::init(Window* window)
 	{
+		m_window = window;
 		gladLoadGL();
 		
 		initImgui();
@@ -86,14 +86,15 @@ namespace Seden {
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 
-		ImGui_ImplGlfw_InitForOpenGL(m_window.getWindowPtr(), true);
+		ImGui_ImplGlfw_InitForOpenGL(m_window->getWindowPtr(), true);
 		ImGui_ImplOpenGL3_Init("#version 330");
 	}
 
 	void Renderer::beginFrame()
 	{
 		glfwPollEvents();
-		glClearColor(0.1f,0.1f,0.1f, 1.0f);
+		glClearColor(0,0,0, 1.0f);
+		//glClearColor(0.1f,0.1f,0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		// imgui
@@ -145,12 +146,12 @@ namespace Seden {
 			glDrawArrays(GL_POINTS, 0, Comp::Point::totalVertexCount);
 		}
 
-		m_window.saveFrame();
+		m_window->saveFrame();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		m_window.swapBuffers();
+		m_window->swapBuffers();
 	}
 
 	void Renderer::drawDebugGui() {

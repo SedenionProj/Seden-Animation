@@ -17,7 +17,11 @@ namespace Seden {
 
 	class Scene {
 	public:
-		Scene(Window& window) : m_window(window) {}
+		Scene() = default;
+		void init(Window* window) { 
+			m_window = window; 
+			m_renderer.init(window);
+		}
 
 		void startAnimationLoop();
 
@@ -44,8 +48,8 @@ namespace Seden {
 	private:
 
 		entt::registry m_registry;
-		Window& m_window;
-		Renderer m_renderer{m_window};
+		Window* m_window;
+		Renderer m_renderer;
 
 		Sync m_waitSync;
 		Sync m_loopSync;		 

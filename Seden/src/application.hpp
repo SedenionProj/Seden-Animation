@@ -12,13 +12,13 @@ namespace Seden {
 
 		~Application();
 	
-	private:
+	protected:
 		uint32_t m_width = 1280, m_height = 720;
-		Window m_window{ m_width, m_height, "application" };
+		Window m_window;
 
 	public:
 		
-		Scene scene{ m_window };
+		Scene scene;
 	};
 
     struct ApplicationInfo {
