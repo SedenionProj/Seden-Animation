@@ -1,17 +1,15 @@
 #pragma once
 
 #include <vector>
+#include <array>
 #include <memory>
 #include <filesystem>
 #include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <stb_truetype.h>
-#include <array>
 
 namespace Seden {
 
 	class Object;
+	class Shader;
 
 	namespace Comp {
 		class Transform {
@@ -155,6 +153,16 @@ namespace Seden {
 			float m_thickness;
 			static bool hasVertexCountChanged;
 			static size_t totalVertexCount;
+		};
+
+		class Shader {
+		public:
+			Shader(uint32_t instanceCount, std::shared_ptr<Seden::Shader> shader);
+
+			std::shared_ptr<Seden::Shader> getShader() { return m_shader; }
+		private:
+			uint32_t m_instanceCount;
+			std::shared_ptr<Seden::Shader> m_shader;
 		};
 	}
 }

@@ -66,6 +66,7 @@ namespace Seden {
 	private:
 		entt::entity m_entity;
 	};
+
 	class ConvexPolygon : public Object {
 	public:
 		static std::shared_ptr<ConvexPolygon> create(const std::initializer_list<Comp::PolygonMesh::Vertex> vertices) {
@@ -103,8 +104,8 @@ namespace Seden {
 
 	class PerspectiveCamera : public Camera {
 	public:
-		static std::shared_ptr<PerspectiveCamera> create() {
-			return std::make_shared<PerspectiveCamera>();
+		static std::shared_ptr<PerspectiveCamera> create(const glm::vec3& position = { 0,0,-1 }) {
+			return std::make_shared<PerspectiveCamera>(position);
 		}
 
 		glm::mat4 getView() override  {
@@ -115,16 +116,16 @@ namespace Seden {
 		    glm::vec3 front = rotation * glm::vec3(0.0f, 0.0f, 1.0f);
 		    glm::vec3 up = rotation * glm::vec3(0.0f, -1.0f, 0.0f);
 		
-		    return glm::lookAt(pos, pos + front, up);
+		    //return glm::lookAt(pos, pos + front, up);
+			return glm::lookAt(pos, glm::vec3(0), up);		// look at origin
 		}
 
 		glm::mat4& getProjection() override {
 			return get<Comp::Perspective>().get();
 		}
 
-		PerspectiveCamera() {
-			auto& t = add<Comp::Transform>(glm::mat4(1));
-			t.setPosition({ 0, 0, -2 });
+		PerspectiveCamera(const glm::vec3& position) {
+			auto& t = add<Comp::Transform>(position);
 			add<Comp::Perspective>(16.f / 9.f);
 		}
 	};
@@ -175,13 +176,24 @@ namespace Seden {
 
 	class Point : public Object {
 	public:
-		static std::shared_ptr<Point> create(float thickness) {
-			return std::make_shared<Point>(thickness);
+		static std::shared_ptr<Point> create(float thickness, const glm::vec3& position = {0,0,0}) {
+			return std::make_shared<Point>(thickness, position);
 		}
-		Point(float thickness) {
-			add<Comp::Transform>();
+		Point(float thickness, const glm::vec3& position) {
+			add<Comp::Transform>(position);
 			add<Comp::Color>(glm::vec4(1));
 			add<Comp::Point>(thickness);
+		}
+	};
+
+	class ShaderQuad : public Object {
+	public:
+		static std::shared_ptr<Point> create(uint32_t instanceCount = 1, const glm::vec3& position = { 0,0,0 }) {
+			return std::make_shared<Point>(instanceCount, position);
+		}
+		ShaderQuad(uint32_t instanceCount, const glm::vec3& position) {
+			add<Comp::Transform>(position);
+			//add<Comp::Shader>(instanceCount);
 		}
 	};
 }

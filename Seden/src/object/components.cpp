@@ -2,11 +2,11 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
-#include <glad/glad.h>
 
 #include "src/object/components.hpp"
 #include "src/logger.h"
 #include "src/object/object.hpp"
+#include "src/opengl/shader.hpp"
 
 namespace Seden {
 	namespace Comp {
@@ -231,5 +231,9 @@ namespace Seden {
 			totalVertexCount -= 1;
 			hasVertexCountChanged = true;
 		}
+
+		// Shader implementation
+		Shader::Shader(uint32_t instanceCount, std::shared_ptr<Seden::Shader> shader)
+			: m_shader(shader) {}
 	}
 }

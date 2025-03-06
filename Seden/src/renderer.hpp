@@ -3,11 +3,11 @@
 #include "src/opengl/vertexArray.hpp"
 #include "src/opengl/buffer.hpp"
 #include "src/opengl/shader.hpp"
-#include "src/window.hpp"
 #include "src/font.hpp"
 
 namespace Seden {
 	class Camera;
+	class Window;
 
 	struct PointVertex {
 		glm::vec4 color;
@@ -30,6 +30,7 @@ namespace Seden {
 		void drawConvexPolygon(Comp::Transform& transform, Comp::PolygonMesh& mesh);
 		void drawText(Comp::Transform& transform, Comp::GroupObjects& letters, Comp::Text& text);
 		void drawPoint(Comp::Transform& transform, Comp::Color& color, Comp::Point& point);
+		void drawShaderQuad(Comp::Transform& transform, Comp::Shader& shader);
 	public:
 		struct DebugStats
 		{
@@ -42,6 +43,7 @@ namespace Seden {
 
 	private:
 		void initImgui();
+		void bindCamera(Shader* shader);
 
 	private:
 		struct PolygonData {

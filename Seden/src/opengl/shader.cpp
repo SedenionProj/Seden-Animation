@@ -25,10 +25,10 @@ namespace Seden {
 	}
 
 
-	void Shader::Bind() const {
+	void Shader::bind() const {
 		glUseProgram(m_id);
 	}
-	void Shader::Unind() const {
+	void Shader::unbind() const {
 		glUseProgram(0);
 	}
 

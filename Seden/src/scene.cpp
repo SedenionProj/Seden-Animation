@@ -1,7 +1,6 @@
 #include "src/scene.hpp"
 #include "src/object/object.hpp"
 
-
 namespace Seden {
 	void Scene::wait(float seconds) {
 		m_waiting = true;
@@ -96,6 +95,10 @@ namespace Seden {
 
 		m_registry.view<Comp::Transform, Comp::Color, Comp::Point>().each([this](const auto object, auto& transform, auto& color, auto& point) {
 			m_renderer.drawPoint(transform, color, point);
+		});
+
+		m_registry.view<Comp::Transform, Comp::Shader>().each([this](const auto object, auto& transform, auto& shader) {
+			m_renderer.drawShaderQuad(transform, shader);
 		});
 	}
 

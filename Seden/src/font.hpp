@@ -1,5 +1,7 @@
 #pragma once
+#include <stb_truetype.h>
 #include <filesystem>
+#include <glad/glad.h>
 
 namespace Seden {
 	class Font{

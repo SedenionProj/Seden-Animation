@@ -7,6 +7,7 @@
 #include "src/object/components.hpp"
 #include "src/logger.h"
 #include "src/object/object.hpp"
+#include "src/window.hpp"
 
 namespace Seden {
 	static void GLAPIENTRY MessageCallback(GLenum source,
@@ -90,6 +91,16 @@ namespace Seden {
 		ImGui_ImplOpenGL3_Init("#version 330");
 	}
 
+	void Renderer::bindCamera(Shader* shader)
+	{
+		if (m_camera) {
+			shader->bind();
+			shader->setMat4("view", m_camera->getView());
+			shader->setMat4("proj", m_camera->getProjection());
+		}
+		
+	}
+
 	void Renderer::beginFrame()
 	{
 		glfwPollEvents();
@@ -123,7 +134,7 @@ namespace Seden {
 			m_polygonData.vbo->setData(Comp::PolygonMesh::totalVertexCount * sizeof(Comp::PolygonMesh::Vertex), m_polygonData.verticesList.data());
 
 			m_polygonData.vertexOffset = 0;
-			m_polygonData.shader->Bind();
+			m_polygonData.shader->bind();
 			m_polygonData.shader->setMat4("view", m_camera->getView());
 			m_polygonData.shader->setMat4("proj", m_camera->getProjection());
 		
@@ -138,7 +149,7 @@ namespace Seden {
 			m_pointData.vbo->setData(Comp::Point::totalVertexCount * sizeof(PointVertex), m_pointData.verticesList.data());
 
 			m_pointData.vertexOffset = 0;
-			m_pointData.shader->Bind();
+			m_pointData.shader->bind();
 			m_pointData.shader->setMat4("view", m_camera->getView());
 			m_pointData.shader->setMat4("proj", m_camera->getProjection());
 
@@ -237,7 +248,7 @@ namespace Seden {
 					3, // position
 					2, // texCoord
 					}));
-				m_shader->Bind();
+				m_shader->bind();
 				m_shader->setMat4("view", m_camera->getView());
 				m_shader->setMat4("proj", m_camera->getProjection());
 				glActiveTexture(GL_TEXTURE0);
@@ -261,5 +272,28 @@ namespace Seden {
 		Comp::Point::totalVertexCount;
 		m_pointData.verticesList[m_pointData.vertexOffset] = { color.m_color,transform.getPosition(), point.m_thickness };
 		m_pointData.vertexOffset++;
+	}
+	void Seden::Renderer::drawShaderQuad(Comp::Transform& transform, Comp::Shader& shader)
+	{
+		shader.getShader()->bind();
+
+		glm::mat4 model = transform.getTransform();
+
+		glm::vec3 vertices[4] = {
+			model * glm::vec4(-1,1,0,1),
+			model * glm::vec4(1,1,0,1),
+			model * glm::vec4(1,-1,0,1),
+			model * glm::vec4(-1,-1,0,1) 
+		};
+
+		VertexBuffer vb(4 * sizeof(glm::vec3), (void*)vertices);
+
+		VertexArray va;
+		va.addVertexBuffer(vb, VertexArrayLayout({
+			3, // position
+			}));
+		bindCamera(shader.getShader().get());
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
 	}
 }

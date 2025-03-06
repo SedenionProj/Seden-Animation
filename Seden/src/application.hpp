@@ -1,24 +1,18 @@
 #pragma once
-#include <iostream>
-#include "src/window.hpp"
 #include "src/scene.hpp"
 
 namespace Seden {
+	class Window;
 	class Application {
 	public:
-		void start();
-
-		virtual void animation() = 0;
-
+		Application();
 		~Application();
-	
-	protected:
+
+		void startScene(Scene* scene);
+
+	private:
 		uint32_t m_width = 1280, m_height = 720;
 		Window m_window;
-
-	public:
-		
-		Scene scene;
 	};
 
     struct ApplicationInfo {

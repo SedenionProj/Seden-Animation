@@ -92,4 +92,16 @@ namespace Seden {
 		T m_to;
 		T& m_var;
 	};
+
+	class PositionFun : public Animator {
+	public:
+		PositionFun(std::shared_ptr<Object> obj, std::function<glm::vec3(float, float)> fun);
+
+		void update(float time, float dt) override;
+
+	private:
+		std::function<glm::vec3(float, float)> m_fun;
+		Comp::Transform& m_transform;
+	};
+
 }

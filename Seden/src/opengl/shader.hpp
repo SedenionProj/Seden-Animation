@@ -97,8 +97,8 @@ namespace Seden {
 		void link();
 
 
-		void Bind() const;
-		void Unind() const;
+		void bind() const;
+		void unbind() const;
 
 		void setBool(const std::string& name, bool value) const;
 		void setInt(const std::string& name, int value) const;

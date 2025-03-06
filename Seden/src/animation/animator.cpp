@@ -55,4 +55,14 @@ namespace Seden {
 		float wave = m_amplitude * cos(m_frequency*time*PI)* m_frequency*PI;
 		m_transform.translate(m_direction * wave *dt);
 	}
+
+	// PositionFun
+
+	PositionFun::PositionFun(std::shared_ptr<Object> obj, std::function<glm::vec3(float, float)> fun)
+		: m_fun(fun), m_transform(obj->get<Comp::Transform>()) {
+	}
+
+	void PositionFun::update(float time, float dt) {
+		m_transform.setPosition(m_fun(time, dt));
+	}
 }

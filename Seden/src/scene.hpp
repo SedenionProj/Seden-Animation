@@ -9,21 +9,18 @@
 #include "src/animation/animation.hpp"
 #include "src/logger.h"
 #include "src/util/clock.hpp"
-#include "src/window.hpp"
 #include "src/util/sync.h"
+#include "src/window.hpp"
 
 namespace Seden {
 	class Camera;
+	class window;
 
 	class Scene {
 	public:
 		Scene() = default;
-		void init(Window* window) { 
-			m_window = window; 
-			m_renderer.init(window);
-		}
 
-		void startAnimationLoop();
+		virtual void animation() = 0;
 
 		void setCamera(std::shared_ptr<Camera> camera);
 
@@ -44,9 +41,13 @@ namespace Seden {
 
 	private:
 		void draw();
+		void startAnimationLoop();
+		void init(Window* window) {
+			m_window = window;
+			m_renderer.init(window);
+		}
 
 	private:
-
 		entt::registry m_registry;
 		Window* m_window;
 		Renderer m_renderer;
@@ -59,6 +60,7 @@ namespace Seden {
 		std::vector<std::unique_ptr<Animation>> m_animations;
 
 		friend class Object;
+		friend class Application;
 	};
 	extern Scene* s_scene;
 }
