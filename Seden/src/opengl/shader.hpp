@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <filesystem>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -93,9 +94,12 @@ void main(){
 namespace Seden {
 	class Shader {
 	public:
+		Shader() = default;
+		Shader(const char* vShaderCode, const char* fShaderCode, const char* gShaderCode = nullptr);
 		void createShader(const char* vShaderCode, const char* fShaderCode, const char* gShaderCode = nullptr);
-		void link();
+		void createShaderPath(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath);
 
+		void link();
 
 		void bind() const;
 		void unbind() const;
@@ -103,9 +107,12 @@ namespace Seden {
 		void setBool(const std::string& name, bool value) const;
 		void setInt(const std::string& name, int value) const;
 		void setFloat(const std::string& name, float value) const;
-		void setVec3(const std::string& name, const glm::vec3 values) const;
-		void setVec2(const std::string& name, const glm::vec2 values) const;
+		void setVec3(const std::string& name, const glm::vec3& values) const;
+		void setVec2(const std::string& name, const glm::vec2& values) const;
 		void setMat4(const std::string& name, const glm::mat4& matrix, const float instance = 1) const;
+
+		std::string m_vertexPath;
+		std::string m_fragmentPath;
 	private:
 		uint32_t attachShader(const char* shaderCode, uint32_t shaderType, const char* name);
 

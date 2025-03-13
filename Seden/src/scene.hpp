@@ -4,13 +4,13 @@
 #include <thread>
 #include <vector>
 
-#include "src/renderer.hpp"
+#include "src/renderer/renderer.hpp"
+#include "src/renderer/shaderRenderer.hpp"
 #include "src/animation/curve.hpp"
 #include "src/animation/animation.hpp"
 #include "src/logger.h"
 #include "src/util/clock.hpp"
 #include "src/util/sync.h"
-#include "src/window.hpp"
 
 namespace Seden {
 	class Camera;
@@ -22,35 +22,26 @@ namespace Seden {
 
 		virtual void animation() = 0;
 
-		void setCamera(std::shared_ptr<Camera> camera);
-
 		void wait(float seconds);
 
-		void block() {
-			m_waitSync.block();
-			m_loopSync.waitUntilUnblocked();
-		}
-		void unBlock() {
-			m_waitSync.unBlock();
-		}
+		void block();
+		void unBlock();	
 
 		void anim(Animator* anim, float time = 1, float shift = 0, Curve* curve = new EaseInOut(5));
 		void animAttach(Animator* anim, float shift = 0);
 
 		float m_animationSpeed = 1;
 
-	private:
-		void draw();
-		void startAnimationLoop();
-		void init(Window* window) {
-			m_window = window;
-			m_renderer.init(window);
-		}
+	protected:
+		
+		virtual void startAnimationLoop() = 0;
+		virtual void init(Window* window) = 0;
 
-	private:
+	protected:
 		entt::registry m_registry;
 		Window* m_window;
-		Renderer m_renderer;
+		
+		bool isRunning = true;
 
 		Sync m_waitSync;
 		Sync m_loopSync;		 
@@ -62,5 +53,39 @@ namespace Seden {
 		friend class Object;
 		friend class Application;
 	};
+
+	class ObjectScene : public Scene {
+	public:
+		void setCamera(std::shared_ptr<Camera> camera);
+		void draw();
+		void startAnimationLoop() override ;
+		void init(Window* window) override {
+			m_window = window;
+			m_renderer.init(window);
+		}
+		Renderer m_renderer;
+	};
+
+
+
+	class ShaderScene : public Scene {
+	public:
+		ShaderScene(const char* vs, const char* fs) {
+			m_renderer.m_shader.createShader(vs, fs);
+		}
+
+		void startAnimationLoop() override;
+		void init(Window* window) override {
+			m_window = window;
+			m_renderer.init(window);
+		}
+
+		void addUniform(ShaderDataType type, const std::string& name, void* value) {
+			m_renderer.m_uniforms.push_back({ value, name, type });
+		}
+
+		ShaderRenderer m_renderer;
+	};
+
 	extern Scene* s_scene;
 }

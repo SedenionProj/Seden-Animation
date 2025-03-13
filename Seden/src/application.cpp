@@ -30,8 +30,14 @@ namespace Seden{
 
 	void Application::startScene(Scene* scene) {
 		s_scene = scene;
-		std::jthread anim(std::bind(&Scene::animation, scene));
 		scene->init(&m_window);
+
+		auto wrappedAnimation = [scene]() {
+			scene->animation();
+			scene->isRunning = false;
+			DEBUG_MSG("fin");
+			};
+		std::jthread anim(wrappedAnimation);
 
 		scene->startAnimationLoop();
 		anim.join();

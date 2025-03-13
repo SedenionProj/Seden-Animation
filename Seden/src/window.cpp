@@ -16,6 +16,8 @@ namespace Seden {
 		m_window = glfwCreateWindow(m_width, m_height, name, nullptr, nullptr);
 		glfwMakeContextCurrent(m_window);
 		glfwSwapInterval(0);
+
+		gladLoadGL();
 	}
 
 	Window::~Window() {

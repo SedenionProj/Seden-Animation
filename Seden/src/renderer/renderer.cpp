@@ -3,7 +3,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "src/renderer.hpp"
+#include "src/renderer/renderer.hpp"
 #include "src/object/components.hpp"
 #include "src/logger.h"
 #include "src/object/object.hpp"
@@ -265,18 +265,17 @@ namespace Seden {
 		}
 	}
 
-
-
 	void Renderer::drawPoint(Comp::Transform& transform, Comp::Color& color, Comp::Point& point)
 	{
 		Comp::Point::totalVertexCount;
 		m_pointData.verticesList[m_pointData.vertexOffset] = { color.m_color,transform.getPosition(), point.m_thickness };
 		m_pointData.vertexOffset++;
 	}
+
 	void Seden::Renderer::drawShaderQuad(Comp::Transform& transform, Comp::Shader& shader)
 	{
-		shader.getShader()->bind();
-
+		auto sh = shader.getShader();
+		sh->bind();
 		glm::mat4 model = transform.getTransform();
 
 		glm::vec3 vertices[4] = {
@@ -292,7 +291,8 @@ namespace Seden {
 		va.addVertexBuffer(vb, VertexArrayLayout({
 			3, // position
 			}));
-		bindCamera(shader.getShader().get());
+		//sh->setMat4("view", m_camera->getView());
+		//sh->setMat4("proj", m_camera->getProjection());
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 	}

@@ -1,6 +1,6 @@
 #include "src/scene.hpp"
 #include "src/object/object.hpp"
-
+#include "src/window.hpp"
 namespace Seden {
 	void Scene::wait(float seconds) {
 		m_waiting = true;
@@ -11,9 +11,15 @@ namespace Seden {
 		m_waitTime = 0;
 	}
 
-	void Scene::setCamera(std::shared_ptr<Camera> camera)
+	void Scene::block()
 	{
-		m_renderer.setCamera(camera);
+		m_waitSync.block();
+		m_loopSync.waitUntilUnblocked();
+	}
+
+	void Scene::unBlock()
+	{
+		m_waitSync.unBlock();
 	}
 
 	void Scene::anim(Animator* anim, float time, float shift, Curve* curve)
@@ -26,10 +32,10 @@ namespace Seden {
 		m_animations.push_back(std::make_unique<AttachAnimation>(anim, shift));
 	}
 
-	void Scene::startAnimationLoop()
+	void ObjectScene::startAnimationLoop()
 	{
 		Clock clock;
-		while (m_window->isRunning()) {
+		while (m_window->isRunning() && isRunning) {
 			m_waitSync.waitUntilUnblocked();
 			m_loopSync.block();
 
@@ -70,8 +76,7 @@ namespace Seden {
 		DEBUG_MSG("end of animation loop");
 	}
 
-
-	void Scene::draw() {
+	void ObjectScene::draw() {
 		m_renderer.drawDebugGui();
 
 		m_registry.view<Comp::Transform, Comp::PolygonMesh>().each([this](const auto object, auto& transform, auto& mesh) {
@@ -102,5 +107,48 @@ namespace Seden {
 		});
 	}
 
+	void ObjectScene::setCamera(std::shared_ptr<Camera> camera)
+	{
+		m_renderer.setCamera(camera);
+	}
 
+	void ShaderScene::startAnimationLoop() {
+		Clock clock;
+		while (m_window->isRunning() && isRunning) {
+			m_waitSync.waitUntilUnblocked();
+			m_loopSync.block();
+
+			bool hasAnimToRemove = false;
+			float dt = m_window->isRecording() ? 1.f / m_window->getFrameRate() : clock.getElapsedTimeAndReset();
+			dt *= m_animationSpeed;
+			if (m_waiting) {
+				m_waitTime += dt;
+			}
+
+			for (auto& anim : m_animations) {
+				anim->update(dt);
+				if (anim->finished)
+					hasAnimToRemove = true;
+			}
+			if (hasAnimToRemove) {
+				m_animations.erase(
+					std::remove_if(
+						m_animations.begin(), m_animations.end(),
+						[&](const std::unique_ptr<Animation>& anim) {
+							return anim->finished;
+						}),
+					m_animations.end());
+			}
+
+			m_renderer.beginFrame();
+			
+
+			m_renderer.draw();
+			m_renderer.endFrame();
+
+			m_loopSync.unBlock();
+
+		}
+		DEBUG_MSG("end of animation loop");
+	}
 }

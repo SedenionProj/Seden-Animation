@@ -188,12 +188,13 @@ namespace Seden {
 
 	class ShaderQuad : public Object {
 	public:
-		static std::shared_ptr<Point> create(uint32_t instanceCount = 1, const glm::vec3& position = { 0,0,0 }) {
-			return std::make_shared<Point>(instanceCount, position);
+		static std::shared_ptr<ShaderQuad> create(std::shared_ptr<Seden::Shader> shader, uint32_t instanceCount = 1, const glm::vec3& position = { 0,0,0 }) {
+			return std::make_shared<ShaderQuad>(shader, instanceCount, position);
 		}
-		ShaderQuad(uint32_t instanceCount, const glm::vec3& position) {
+
+		ShaderQuad(std::shared_ptr<Seden::Shader> shader, uint32_t instanceCount, const glm::vec3& position) {
 			add<Comp::Transform>(position);
-			//add<Comp::Shader>(instanceCount);
+			add<Comp::Shader>(instanceCount, shader);
 		}
 	};
 }

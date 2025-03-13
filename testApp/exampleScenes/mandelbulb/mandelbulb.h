@@ -30,7 +30,30 @@ struct Triplex {
 	}
 };
 
-class TestScene : public Scene {
+//tmp
+inline const char* fs = R"(#version 330 core
+out vec4 _outFragColor;
+uniform int iFrame;
+
+uniform float test;
+
+in vec2 iFragPos;
+void main(){
+	if(length(iFragPos)<0.5)
+		_outFragColor = vec4(test,0,0,1);
+})";
+
+inline const char* vs = R"(#version 330 core
+layout (location = 0) in vec2 aPos;
+
+out vec2 iFragPos;
+
+void main(){
+	iFragPos = aPos;
+	gl_Position = vec4(aPos, 0.0, 1.0);
+})";
+
+class TestScene : public ObjectScene {
 	//std::shared_ptr<OrthographicCamera> cam;
 	std::shared_ptr<PerspectiveCamera> cam;
 
@@ -41,8 +64,24 @@ public:
 		//cam = OrthographicCamera::create(0, 1.1, 1.1,-0.05);
 		setCamera(cam);
 		scene1();
-
+		
 		DEBUG_MSG("fin");
+	}
+
+	void scene2() {
+
+		int a = 1;
+		vec3 b = vec3(1);
+
+		auto shader = std::make_shared<Shader>();
+		shader->createShader(vs, fs);
+
+		auto screen = ShaderQuad::create(shader);
+		//auto sh = screen->get<Comp::Shader>();
+
+		//sh->setUniform(&a, "a");
+		//sh->setUniform(&b, "b");
+		wait(10);
 	}
 
 	void scene1() {
@@ -77,19 +116,7 @@ public:
 
 	}
 
-	void scene2() {
-
-		int a = 1;
-		vec3 b = vec3(1);
-
-		//Shader shader("res/shaders/mandelbrot.glsl");
-		auto screen = ShaderQuad::create();
-		auto sh = screen->get<Comp::Shader>();
-
-		//sh->setUniform(&a, "a");
-		//sh->setUniform(&b, "b");
-
-	}
+	
 
 private:
 	bool mandelbrot(float x, float y) {
@@ -115,5 +142,19 @@ private:
 				return false;
 		}
 		return true;
+	}
+};
+
+class TestShader : public ShaderScene {
+public:
+	TestShader() : ShaderScene(vs, fs) {}
+	float val = 0.0f;
+	void animation() override {
+		
+		addUniform(ShaderDataType::FLOAT, "test", &val);
+
+		anim(new ChangeTo(val, 1.f), 5);
+
+		wait(5);
 	}
 };

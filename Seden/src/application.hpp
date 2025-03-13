@@ -1,5 +1,6 @@
 #pragma once
 #include "src/scene.hpp"
+#include "window.hpp"
 
 namespace Seden {
 	class Window;
