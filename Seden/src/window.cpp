@@ -18,6 +18,16 @@ namespace Seden {
 		glfwSwapInterval(0);
 
 		gladLoadGL();
+
+		glfwSetWindowUserPointer(m_window, this);
+		glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
+		{
+			Window* app = static_cast<Window*>(glfwGetWindowUserPointer(window));
+			if (app) {
+				app->m_width = width;
+				app->m_height = height;
+			}
+		});
 	}
 
 	Window::~Window() {

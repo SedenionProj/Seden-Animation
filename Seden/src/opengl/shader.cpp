@@ -29,24 +29,43 @@ namespace Seden {
 
 	void Shader::createShaderPath(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath)
 	{
-		std::ifstream vertexFile(vertexPath);
-		std::ifstream fragmentFile(fragmentPath);
+		std::string vertexCode = processShader(vertexPath);
+		std::string fragmentCode = processShader(fragmentPath);
+		m_vertexPath = vertexPath;
+		m_fragmentPath = fragmentPath;
+		createShader(vertexCode.c_str(), fragmentCode.c_str(), nullptr);
+	}
 
-		if (!vertexFile.is_open() || !fragmentFile.is_open()) {
-			std::cerr << "Failed to open shader file: " << vertexPath << " or " << fragmentPath << std::endl;
-			return;
+	std::string Shader::processShader(const std::filesystem::path& shaderPath) {
+		std::ifstream file(shaderPath);
+		if (!file.is_open()) {
+			std::cerr << "Failed to open shader file: " << shaderPath << std::endl;
+			return "";
 		}
 
-		std::stringstream vertexStream, fragmentStream;
-		vertexStream << vertexFile.rdbuf();
-		fragmentStream << fragmentFile.rdbuf();
+		std::stringstream processedShader;
+		std::string line;
+		std::filesystem::path directory = shaderPath.parent_path();
 
-		std::string vertexCode = vertexStream.str();
-		std::string fragmentCode = fragmentStream.str();
+		while (std::getline(file, line)) {
+			if (line.find("#include") == 0) {
+				std::string includeFile = line.substr(9); // Remove "#include "
+				includeFile.erase(remove(includeFile.begin(), includeFile.end(), '\"'), includeFile.end()); // Remove quotes
 
-		DEBUG_MSG("%s", vertexCode.c_str());
-
-		createShader(vertexCode.c_str(), fragmentCode.c_str(), nullptr);
+				std::filesystem::path includePath = directory / includeFile;
+				if (std::filesystem::exists(includePath)) {
+					processedShader << processShader(includePath) << "\n";
+				} else if (std::filesystem::exists(includeFile)) {
+					processedShader << processShader(includeFile) << "\n";
+				} else {
+					DEBUG_ERROR("failed to include %s, file not found", includeFile.c_str());
+				}
+			}
+			else {
+				processedShader << line << "\n";
+			}
+		}
+		return processedShader.str();
 	}
 
 	void Shader::link() {

@@ -111,10 +111,11 @@ namespace Seden {
 		void setVec2(const std::string& name, const glm::vec2& values) const;
 		void setMat4(const std::string& name, const glm::mat4& matrix, const float instance = 1) const;
 
-		std::string m_vertexPath;
-		std::string m_fragmentPath;
+		std::filesystem::path m_vertexPath;
+		std::filesystem::path m_fragmentPath;
 	private:
 		uint32_t attachShader(const char* shaderCode, uint32_t shaderType, const char* name);
+		std::string processShader(const std::filesystem::path& shaderPath);
 
 		void checkCompileErrors(uint32_t shader, std::string type);
 

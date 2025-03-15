@@ -48,4 +48,13 @@ namespace Seden {
 		uint32_t m_count = 0;
 		uint32_t m_id;
 	};
+
+	class ShaderStorageBuffer {
+	public:
+		ShaderStorageBuffer(uint32_t size, const void* data);
+		void bind();
+	private:
+		static uint32_t m_index;
+		uint32_t m_id;
+	};
 }

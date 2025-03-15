@@ -26,6 +26,9 @@ namespace Seden {
 		void swapBuffers();
 		GLFWwindow* getWindowPtr();
 
+		uint32_t getWidth() { return m_width; }
+		uint32_t getHeight() { return m_height; }
+
 	private:
 		uint32_t m_frameRate = 0;
 		uint32_t m_width = 0;

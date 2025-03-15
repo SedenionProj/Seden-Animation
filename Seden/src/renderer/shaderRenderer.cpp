@@ -4,28 +4,34 @@
 #include <imgui_impl_opengl3.h>
 #include "src/window.hpp"
 #include "src/renderer/shaderRenderer.hpp"
+#include "src/logger.h"
 
 namespace Seden {
 
 	void ShaderRenderer::init(Window* window)
 	{
 		m_window = window;
-		
+
 		initImgui();
 		glEnable(GL_DEBUG_OUTPUT);
-		glm::vec2 vertices[] = {
-			{-1,  1},
-			{ 1,  1},
-			{ 1, -1},
-			{-1, -1}
+		float vertices[] = {
+			-1,  1,
+			 1,  1,
+			 1, -1,
+			-1, -1
 		};
 		m_vao = std::make_unique<VertexArray>();
 		m_vbo = std::make_unique<VertexBuffer>(sizeof(vertices), static_cast<void*>(vertices));
 		m_vao->addVertexBuffer(*m_vbo, { 2 });
+
+		std::vector<glm::vec4> colBuf(m_window->getWidth() * m_window->getHeight(), glm::vec4(0.0));
+		m_ssbo = std::make_unique<ShaderStorageBuffer>(colBuf.size() * sizeof(glm::vec4), colBuf.data());
 	}
 	void ShaderRenderer::beginFrame()
 	{
 		glfwPollEvents();
+
+		glViewport(0, 0, m_window->getWidth(), m_window->getHeight());
 
 		// imgui
 		ImGui_ImplOpenGL3_NewFrame();
@@ -49,11 +55,14 @@ namespace Seden {
 	{
 		ImGui::Begin("debug");
 		m_shader.bind();
-
+		m_ssbo->bind();
 		ImGui::SliderFloat2("range", glm::value_ptr(m_range), -100, 100);
 		if (ImGui::Button("recompile")) {
 			if (!m_shader.m_vertexPath.empty()) {
 				m_shader.createShaderPath(m_shader.m_vertexPath, m_shader.m_fragmentPath);
+			}
+			else {
+				DEBUG_ERROR("Shaders path missing");
 			}
 		}
 		ImGui::Separator();

@@ -89,4 +89,17 @@ namespace Seden {
 	uint32_t IndexBuffer::getCount() const {
 		return m_count;
 	}
+
+	uint32_t ShaderStorageBuffer::m_index = 0;
+
+	ShaderStorageBuffer::ShaderStorageBuffer(uint32_t size, const void* data) {
+		glGenBuffers(1,&m_id);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_id);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, size, data, GL_STATIC_DRAW);
+	}
+
+	void ShaderStorageBuffer::bind() {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_index, m_id);
+		m_index++;
+	}
 }

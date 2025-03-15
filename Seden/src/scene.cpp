@@ -11,6 +11,13 @@ namespace Seden {
 		m_waitTime = 0;
 	}
 
+	void Scene::wait()
+	{
+		while (m_window->isRunning()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}
+	}
+
 	void Scene::block()
 	{
 		m_waitSync.block();
@@ -141,8 +148,6 @@ namespace Seden {
 			}
 
 			m_renderer.beginFrame();
-			
-
 			m_renderer.draw();
 			m_renderer.endFrame();
 

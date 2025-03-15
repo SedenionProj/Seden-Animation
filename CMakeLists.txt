@@ -10,8 +10,10 @@ file(GLOB_RECURSE SEDEN_SOURCE
 	Seden/src/*.cpp
 )
 
+file(COPY "${CMAKE_SOURCE_DIR}/Seden/assets" DESTINATION "${CMAKE_BINARY_DIR}")
+
 if (MSVC)
-  add_definitions(/wd4244 /wd4267 /wd4305)
+	add_definitions(/wd4244 /wd4267 /wd4305)
 endif ()
 
 add_library (seden_lib ${SEDEN_SOURCE})

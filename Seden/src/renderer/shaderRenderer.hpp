@@ -20,8 +20,8 @@ namespace Seden {
 	class ShaderRenderer {
 	public:
 		ShaderRenderer() = default;
-		void init(Window* window);
 		//~ShaderRenderer();
+		void init(Window* window);
 		void beginFrame();
 		void endFrame();
 		void draw();
@@ -34,5 +34,6 @@ namespace Seden {
 		Window* m_window;
 		std::unique_ptr<VertexBuffer> m_vbo;
 		std::unique_ptr<VertexArray>  m_vao;
+		std::unique_ptr<ShaderStorageBuffer> m_ssbo;
 	};
 }

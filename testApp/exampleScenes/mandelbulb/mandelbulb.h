@@ -30,29 +30,6 @@ struct Triplex {
 	}
 };
 
-//tmp
-inline const char* fs = R"(#version 330 core
-out vec4 _outFragColor;
-uniform int iFrame;
-
-uniform float test;
-
-in vec2 iFragPos;
-void main(){
-	if(length(iFragPos)<0.5)
-		_outFragColor = vec4(test,0,0,1);
-})";
-
-inline const char* vs = R"(#version 330 core
-layout (location = 0) in vec2 aPos;
-
-out vec2 iFragPos;
-
-void main(){
-	iFragPos = aPos;
-	gl_Position = vec4(aPos, 0.0, 1.0);
-})";
-
 class TestScene : public ObjectScene {
 	//std::shared_ptr<OrthographicCamera> cam;
 	std::shared_ptr<PerspectiveCamera> cam;
@@ -67,23 +44,6 @@ public:
 		
 		DEBUG_MSG("fin");
 	}
-
-	void scene2() {
-
-		int a = 1;
-		vec3 b = vec3(1);
-
-		auto shader = std::make_shared<Shader>();
-		shader->createShader(vs, fs);
-
-		auto screen = ShaderQuad::create(shader);
-		//auto sh = screen->get<Comp::Shader>();
-
-		//sh->setUniform(&a, "a");
-		//sh->setUniform(&b, "b");
-		wait(10);
-	}
-
 	void scene1() {
 		m_animationSpeed = 1.f;
 		Comp::GroupObjects squares;
@@ -147,7 +107,9 @@ private:
 
 class TestShader : public ShaderScene {
 public:
-	TestShader() : ShaderScene(vs, fs) {}
+	TestShader() : ShaderScene(
+		"C:/Users/Gerome/source/repos/Seden-Animation/testApp/exampleScenes/mandelbulb/mandelbrotVS.glsl", 
+		"C:/Users/Gerome/source/repos/Seden-Animation/testApp/exampleScenes/mandelbulb/mandelbrotFS.glsl") {}
 	float val = 0.0f;
 	void animation() override {
 		
@@ -155,6 +117,6 @@ public:
 
 		anim(new ChangeTo(val, 1.f), 5);
 
-		wait(5);
+		wait();
 	}
 };

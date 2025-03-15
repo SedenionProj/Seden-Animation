@@ -23,6 +23,7 @@ namespace Seden {
 		virtual void animation() = 0;
 
 		void wait(float seconds);
+		void wait();
 
 		void block();
 		void unBlock();	
@@ -71,7 +72,7 @@ namespace Seden {
 	class ShaderScene : public Scene {
 	public:
 		ShaderScene(const char* vs, const char* fs) {
-			m_renderer.m_shader.createShader(vs, fs);
+			m_renderer.m_shader.createShaderPath(vs, fs);
 		}
 
 		void startAnimationLoop() override;
