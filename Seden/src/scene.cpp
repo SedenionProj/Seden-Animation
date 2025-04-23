@@ -121,6 +121,7 @@ namespace Seden {
 
 	void ShaderScene::startAnimationLoop() {
 		Clock clock;
+		float time = 0;
 		while (m_window->isRunning() && isRunning) {
 			m_waitSync.waitUntilUnblocked();
 			m_loopSync.block();
@@ -148,8 +149,10 @@ namespace Seden {
 			}
 
 			m_renderer.beginFrame();
-			m_renderer.draw();
+			m_renderer.draw(time, dt);
 			m_renderer.endFrame();
+
+			time += dt;
 
 			m_loopSync.unBlock();
 

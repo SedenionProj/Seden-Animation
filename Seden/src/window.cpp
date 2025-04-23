@@ -13,6 +13,8 @@ namespace Seden {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
 		m_window = glfwCreateWindow(m_width, m_height, name, nullptr, nullptr);
 		glfwMakeContextCurrent(m_window);
 		glfwSwapInterval(0);
@@ -20,14 +22,14 @@ namespace Seden {
 		gladLoadGL();
 
 		glfwSetWindowUserPointer(m_window, this);
-		glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
-		{
-			Window* app = static_cast<Window*>(glfwGetWindowUserPointer(window));
-			if (app) {
-				app->m_width = width;
-				app->m_height = height;
-			}
-		});
+		//glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
+		//{
+		//	Window* app = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		//	if (app) {
+		//		app->m_width = width;
+		//		app->m_height = height;
+		//	}
+		//});
 	}
 
 	Window::~Window() {

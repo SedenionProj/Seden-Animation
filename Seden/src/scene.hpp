@@ -71,8 +71,9 @@ namespace Seden {
 
 	class ShaderScene : public Scene {
 	public:
-		ShaderScene(const char* vs, const char* fs) {
+		ShaderScene(const char* vs, const char* fs, uint32_t renderPassCount = 1) {
 			m_renderer.m_shader.createShaderPath(vs, fs);
+			m_renderer.m_renderPassCount = renderPassCount;
 		}
 
 		void startAnimationLoop() override;
@@ -81,8 +82,8 @@ namespace Seden {
 			m_renderer.init(window);
 		}
 
-		void addUniform(ShaderDataType type, const std::string& name, void* value) {
-			m_renderer.m_uniforms.push_back({ value, name, type });
+		void addUniform(ShaderDataType type, const std::string& name, void* value, float min=0, float max=1, int precision=3) {
+			m_renderer.m_uniforms.push_back({ value, name, type, {min, max, precision} });
 		}
 
 		ShaderRenderer m_renderer;

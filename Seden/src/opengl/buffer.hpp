@@ -57,4 +57,20 @@ namespace Seden {
 		static uint32_t m_index;
 		uint32_t m_id;
 	};
+
+	class Framebuffer {
+	public:
+		Framebuffer(uint32_t width, uint32_t height);
+		~Framebuffer();
+
+		uint32_t getTexture() { return m_colorTex; }
+
+		void bind();
+		void unBind();
+	private:
+		uint32_t m_width;
+		uint32_t m_height;
+		uint32_t m_id;
+		uint32_t m_colorTex;
+	};
 }

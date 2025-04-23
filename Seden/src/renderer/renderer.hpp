@@ -46,6 +46,11 @@ namespace Seden {
 		void bindCamera(Shader* shader);
 
 	private:
+		Shader m_screenShader;
+		std::unique_ptr<VertexBuffer> m_vbo;
+		std::unique_ptr<Framebuffer> m_framebuffer;
+		std::unique_ptr<VertexArray>  m_screenQuadVAO;
+
 		struct PolygonData {
 			std::unique_ptr<VertexBuffer> vbo;
 			std::unique_ptr<VertexArray>  vao;

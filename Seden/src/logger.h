@@ -3,20 +3,24 @@
 
 #if 1
 	#if 0//defined(SEDEN_VERBOSE)
-		#define DEBUG_ERROR(Message, ...) \
-		    printf("ERROR: " Message " [%s:%d]\n", __FILE__, __LINE__, ##__VA_ARGS__)
-		#define DEBUG_MSG(Message, ...) \
-		    printf("MESSAGE: " Message " [%s:%d]\n", __FILE__, __LINE__, ##__VA_ARGS__)
-		#define DEBUG_WARNING(Message, ...) \
-		    printf("WARNING: " Message " [%s:%d]\n", __FILE__, __LINE__, ##__VA_ARGS__)
+		#define DEBUG_ERROR(fmt, ...) \
+		    printf("ERROR: " fmt " [%s:%d]\n", ##__VA_ARGS__, __FILE__, __LINE__)
+		
+		#define DEBUG_MSG(fmt, ...) \
+		    printf("MESSAGE: " fmt " [%s:%d]\n", ##__VA_ARGS__, __FILE__, __LINE__)
+		
+		#define DEBUG_WARNING(fmt, ...) \
+		    printf("WARNING: " fmt " [%s:%d]\n", ##__VA_ARGS__, __FILE__, __LINE__)
+		
 	#else
-		#define DEBUG_ERROR(Message,...) printf("ERROR: " Message "\n", ##__VA_ARGS__)
-		#define DEBUG_MSG(Message,...) printf("MESSAGE: " Message "\n", ##__VA_ARGS__)
-		#define DEBUG_WARNING(Message,...) printf("WARNING: " Message "\n", ##__VA_ARGS__)
+		#define DEBUG_ERROR(fmt, ...) printf("ERROR: " fmt "\n", ##__VA_ARGS__)
+		#define DEBUG_MSG(fmt, ...)   printf("MESSAGE: " fmt "\n", ##__VA_ARGS__)
+		#define DEBUG_WARNING(fmt, ...) printf("WARNING: " fmt "\n", ##__VA_ARGS__)
+
 	#endif
 
-	#define DEBUG_ASSERT(x, ...) \
-	    if (!(x)) DEBUG_WARNING("Assertion failed: " __VA_ARGS__)
+	#define DEBUG_ASSERT(x, fmt, ...) \
+	    if (!(x)) DEBUG_WARNING("Assertion failed: " fmt, ##__VA_ARGS__)
 	#define DEBUG_CHECK_OPENGL() switch (glGetError()){\
 			case GL_INVALID_ENUM:\
 				DEBUG_ERROR("GL_INVALID_ENUM");\

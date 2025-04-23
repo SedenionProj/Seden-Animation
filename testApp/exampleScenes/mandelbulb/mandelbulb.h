@@ -73,7 +73,7 @@ public:
 		}
 
 		unBlock();
-
+		wait();
 	}
 
 	
@@ -105,18 +105,55 @@ private:
 	}
 };
 
-class TestShader : public ShaderScene {
+class Mandelbrot : public ShaderScene {
 public:
-	TestShader() : ShaderScene(
-		"C:/Users/Gerome/source/repos/Seden-Animation/testApp/exampleScenes/mandelbulb/mandelbrotVS.glsl", 
-		"C:/Users/Gerome/source/repos/Seden-Animation/testApp/exampleScenes/mandelbulb/mandelbrotFS.glsl") {}
-	float val = 0.0f;
+	Mandelbrot() : ShaderScene(
+		"C:/Users/Gerome/source/repos/Seden-Animation/Seden/assets/shaders/basicPosVS.glsl", 
+		"C:/Users/Gerome/source/repos/Seden-Animation/testApp/exampleScenes/mandelbulb/mandelbrotFS.glsl", 1) {
+	}
+	float zoom = 0.7f;//0.249f; 0.135
+	float libre = 0.1f;
+	float angle = 0.1f;
+	vec2 pos = { 0,0 };
+	vec3 color = { 0.257,0,0 };
+
 	void animation() override {
+
+		addUniform(ShaderDataType::FLOAT, "zoom", &zoom);
+		addUniform(ShaderDataType::FLOAT, "libre", &libre);
+		addUniform(ShaderDataType::FLOAT, "angle", &angle);
+		addUniform(ShaderDataType::VEC2, "pos", &pos);
+		addUniform(ShaderDataType::VEC3, "color", &color);
+
 		
-		addUniform(ShaderDataType::FLOAT, "test", &val);
+		//animAttach(new VarPositionFun(zoom, [](float t, float dt) -> float { return 0.85*(cos(t*0.1)*0.5f)+0.5f+0.135; }));
+		//animAttach(new VarPositionFun(angle, [](float t, float dt) -> float { return 0.85*cos(t*0.1)*2.; }));
 
-		anim(new ChangeTo(val, 1.f), 5);
 
+		wait();
+	}
+};
+
+class Mandelbulb : public ShaderScene {
+public:
+	Mandelbulb() : ShaderScene(
+		"C:/Users/Gerome/source/repos/Seden-Animation/Seden/assets/shaders/basicPosVS.glsl",
+		"C:/Users/Gerome/source/repos/Seden-Animation/testApp/exampleScenes/mandelbulb/mandelbulbFS.glsl") {
+	}
+	float zoom = 0.f;
+	float libre = 5.f;
+	vec2 pos = { 3.335,-3.1415 / 2. };
+	vec3 color = { 0.339,1,0.413 };
+	vec3 m_precision = {0.001, 100,0};
+	float power = 8;
+
+	void animation() override {
+		addUniform(ShaderDataType::FLOAT, "zoom", &zoom, -1, 1.,7);
+		addUniform(ShaderDataType::FLOAT, "libre", &libre, -5, 5);
+		addUniform(ShaderDataType::FLOAT, "power", &power, 1, 24);
+		addUniform(ShaderDataType::VEC2, "pos", &pos, -4,4);
+		addUniform(ShaderDataType::VEC3, "color", &color);
+		addUniform(ShaderDataType::VEC3, "m_precision", &m_precision, 0, 0.001, 7);
 		wait();
 	}
 };

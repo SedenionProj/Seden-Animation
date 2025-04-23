@@ -1,8 +1,14 @@
+#include "buffer.hpp"
+#include "buffer.hpp"
 #include <glad/glad.h>
 
 #include "src/opengl/buffer.hpp"
+#include "src/logger.h"
 
 namespace Seden {
+
+	// VertexBuffer
+
 	VertexBuffer::VertexBuffer()
 	{
 		glGenBuffers(1, &m_id);
@@ -42,6 +48,8 @@ namespace Seden {
 	void VertexBuffer::setData(size_t size) {
 		setData(size, nullptr);
 	}
+
+	// IndexBuffer
 
 	IndexBuffer::IndexBuffer() {
 		glGenBuffers(1, &m_id);
@@ -90,9 +98,15 @@ namespace Seden {
 		return m_count;
 	}
 
+	// ShaderStorageBuffer
+
 	uint32_t ShaderStorageBuffer::m_index = 0;
 
 	ShaderStorageBuffer::ShaderStorageBuffer(uint32_t size, const void* data) {
+		GLint maxSSBOSize = 0;
+		glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxSSBOSize);
+		DEBUG_ASSERT(size <= maxSSBOSize, "Failed to create Shader storage buffer, capacity exceeded (current: %i, max: %i)", size, maxSSBOSize);
+
 		glGenBuffers(1,&m_id);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_id);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, size, data, GL_STATIC_DRAW);
@@ -102,4 +116,49 @@ namespace Seden {
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_index, m_id);
 		m_index++;
 	}
+
+
+	// Framebuffer
+
+	Framebuffer::Framebuffer(uint32_t width, uint32_t height)
+		: m_width(width), m_height(height) {
+		glGenFramebuffers(1, &m_id);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+
+		GLint maxTexSize;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
+		DEBUG_ASSERT(width <= (uint32_t)maxTexSize && height <= (uint32_t)maxTexSize, "Framebuffer %u x %u too large (max : %i)", width, height, maxTexSize);
+
+		// Create texture
+		glGenTextures(1, &m_colorTex);
+		glBindTexture(GL_TEXTURE_2D, m_colorTex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// Attach texture
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorTex, 0);
+
+		GLenum ret_code = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (ret_code != GL_FRAMEBUFFER_COMPLETE) {
+			DEBUG_ERROR("Failed to create Framebuffer : %u", ret_code);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	}
+	
+	Framebuffer::~Framebuffer() {
+		glDeleteFramebuffers(1, &m_id);
+	}
+
+	void Framebuffer::bind()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+	}
+
+	void Framebuffer::unBind()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
 }

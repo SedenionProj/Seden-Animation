@@ -15,6 +15,7 @@ namespace Seden {
 		void* data;
 		std::string name;
 		ShaderDataType dataType;
+		glm::vec3 range;
 	};
 
 	class ShaderRenderer {
@@ -24,16 +25,19 @@ namespace Seden {
 		void init(Window* window);
 		void beginFrame();
 		void endFrame();
-		void draw();
+		void draw(float time, float dt);
 		Shader m_shader;
 		std::vector<Uniform> m_uniforms;
+		int m_renderPassCount = 1;
 	private:
 		void initImgui();
 	private:
-		glm::vec2 m_range = {0, 1};
 		Window* m_window;
+		Shader m_screenShader;
 		std::unique_ptr<VertexBuffer> m_vbo;
+		std::unique_ptr<Framebuffer> m_framebuffer;
 		std::unique_ptr<VertexArray>  m_vao;
-		std::unique_ptr<ShaderStorageBuffer> m_ssbo;
+		std::unique_ptr<ShaderStorageBuffer> m_colorSSBO;
+		std::unique_ptr<ShaderStorageBuffer> m_arraySSBO;
 	};
 }

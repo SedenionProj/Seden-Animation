@@ -64,6 +64,19 @@ namespace Seden {
 			3, // position
 			1, // thickness
 			}));
+
+		m_screenShader.createShader(screenVertexShader, screenFragmentShader);
+		m_framebuffer = std::make_unique<Framebuffer>(m_window->getWidth(), m_window->getHeight());
+
+		float vertices[] = {
+			-1,  1,
+			 1,  1,
+			 1, -1,
+			-1, -1
+		};
+		m_screenQuadVAO = std::make_unique<VertexArray>();
+		m_vbo = std::make_unique<VertexBuffer>(sizeof(vertices), static_cast<void*>(vertices));
+		m_screenQuadVAO->addVertexBuffer(*m_vbo, { 2 });
 	}
 
 	Renderer::~Renderer()
@@ -104,9 +117,10 @@ namespace Seden {
 	void Renderer::beginFrame()
 	{
 		glfwPollEvents();
+		m_framebuffer->bind();
 		glClearColor(0,0,0, 1.0f);
 		//glClearColor(0.1f,0.1f,0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// imgui
 		ImGui_ImplOpenGL3_NewFrame();
@@ -161,6 +175,16 @@ namespace Seden {
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// draw on screen
+		m_framebuffer->unBind();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		m_screenShader.bind();
+		m_screenQuadVAO->bind();
+		glBindTexture(GL_TEXTURE_2D, m_framebuffer->getTexture());
+
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 		m_window->swapBuffers();
 	}

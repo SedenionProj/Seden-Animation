@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include "src/util/math.h"
+#include "src/logger.h"
 
 namespace Seden {
 	class Object;
@@ -104,4 +105,18 @@ namespace Seden {
 		Comp::Transform& m_transform;
 	};
 
+	template<typename T, typename F>
+	class VarPositionFun : public Animator {
+	public:
+		VarPositionFun(T& var, F fun) 
+			: m_var(var), m_fun(fun) {}
+
+		void update(float time, float dt) override {
+			m_var = m_fun(time, dt);
+		}
+
+	private:
+		T& m_var;
+		F m_fun;
+	};
 }

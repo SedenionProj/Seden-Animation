@@ -6,6 +6,26 @@
 #include <glm/gtc/type_ptr.hpp>
 
 //tmp
+
+inline const char* screenFragmentShader = R"(#version 330 core
+out vec4 _outFragColor;
+uniform int iFrame;
+uniform sampler2D uTexture;
+in vec3 iFragPos;
+void main(){
+	_outFragColor = vec4(texture(uTexture, (iFragPos.xy+1.)/2.).rgb,1);
+})";
+
+inline const char* screenVertexShader = R"(#version 330 core
+layout (location = 0) in vec3 aPos;
+
+out vec3 iFragPos;
+
+void main(){
+	iFragPos = aPos;
+	gl_Position = vec4(aPos, 1.0);
+})";
+
 inline const char* baseFragmentShader = R"(#version 330 core
 out vec4 _outFragColor;
 uniform int iFrame;
