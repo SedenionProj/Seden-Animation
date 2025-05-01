@@ -15,6 +15,14 @@ namespace Seden {
 		float thickness;
 	};
 
+	struct LineVertex {
+		glm::vec4 color;
+		glm::vec4 position;
+		float thickness;
+		int beginIndex;
+		glm::vec2 padding = { 0,0 };
+	};
+
 	class Renderer {
 	public:
 		Renderer() = default;
@@ -31,6 +39,7 @@ namespace Seden {
 		void drawText(Comp::Transform& transform, Comp::GroupObjects& letters, Comp::Text& text);
 		void drawPoint(Comp::Transform& transform, Comp::Color& color, Comp::Point& point);
 		void drawShaderQuad(Comp::Transform& transform, Comp::Shader& shader);
+		void drawPath(Comp::Path& path);
 	public:
 		struct DebugStats
 		{
@@ -50,6 +59,15 @@ namespace Seden {
 		std::unique_ptr<VertexBuffer> m_vbo;
 		std::unique_ptr<Framebuffer> m_framebuffer;
 		std::unique_ptr<VertexArray>  m_screenQuadVAO;
+
+		struct PathData {
+			std::unique_ptr<VertexArray> vao;
+			std::unique_ptr<ShaderStorageBuffer> ssbo;
+			std::unique_ptr<Shader> shader;
+			std::vector<LineVertex> verticesList;
+			uint32_t vertexOffset = 0;
+			uint32_t pathOffset = 0;
+		};
 
 		struct PolygonData {
 			std::unique_ptr<VertexBuffer> vbo;
@@ -76,6 +94,7 @@ namespace Seden {
 
 		PolygonData m_polygonData;
 		PointData m_pointData;
+		PathData m_pathData;
 
 		
 

@@ -7,7 +7,7 @@ namespace Seden{
 
 	Application::Application() {
 		ApplicationInfo appInfo;
-		//appInfo.resolution = { 1920,1080 };
+		appInfo.resolution = { 1920,1080 };
 		//appInfo.optionsFlags |= ApplicationInfo::RECORD;
 		//appInfo.optionsFlags |= ApplicationInfo::VSYNC;
 

@@ -104,17 +104,25 @@ namespace Seden {
 
 	ShaderStorageBuffer::ShaderStorageBuffer(uint32_t size, const void* data) {
 		GLint maxSSBOSize = 0;
+		
 		glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxSSBOSize);
 		DEBUG_ASSERT(size <= maxSSBOSize, "Failed to create Shader storage buffer, capacity exceeded (current: %i, max: %i)", size, maxSSBOSize);
 
 		glGenBuffers(1,&m_id);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_id);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, size, data, GL_STATIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, size, data, GL_DYNAMIC_DRAW);
+	}
+	void ShaderStorageBuffer::setData(size_t size, const void* data) {
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_id);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, size, data, GL_DYNAMIC_DRAW);
 	}
 
-	void ShaderStorageBuffer::bind() {
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_index, m_id);
-		m_index++;
+	void ShaderStorageBuffer::bind(uint32_t location) {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, location, m_id);
+	}
+
+	ShaderStorageBuffer::~ShaderStorageBuffer() {
+		glDeleteBuffers(1, &m_id);
 	}
 
 

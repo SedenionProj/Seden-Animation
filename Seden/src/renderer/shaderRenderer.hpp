@@ -3,6 +3,8 @@
 #include "src/opengl/buffer.hpp"
 #include "src/opengl/vertexArray.hpp"
 #include "src/opengl/shader.hpp"
+#include "src/font.hpp"
+#include "src/object/components.hpp"
 
 namespace Seden {
 	class Window;
@@ -26,6 +28,7 @@ namespace Seden {
 		void beginFrame();
 		void endFrame();
 		void draw(float time, float dt);
+		void drawText(Comp::Transform& transform, Comp::GroupObjects& letters, Comp::Text& text);
 		Shader m_shader;
 		std::vector<Uniform> m_uniforms;
 		int m_renderPassCount = 1;
@@ -34,6 +37,11 @@ namespace Seden {
 	private:
 		Window* m_window;
 		Shader m_screenShader;
+
+		// text
+		std::unique_ptr<Font> m_font;
+		std::unique_ptr<Shader> m_letterShader;
+
 		std::unique_ptr<VertexBuffer> m_vbo;
 		std::unique_ptr<Framebuffer> m_framebuffer;
 		std::unique_ptr<VertexArray>  m_vao;

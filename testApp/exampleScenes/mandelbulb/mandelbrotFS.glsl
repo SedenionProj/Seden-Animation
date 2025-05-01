@@ -18,7 +18,10 @@ uniform vec3 color;
 uniform int iPass;
 uniform vec2 iTime;
 
-#define MAX_ITER 1000
+uniform vec2 uShift;
+
+
+#define MAX_ITER 100
 
 mat2 rot(float theta){
     float c = cos(theta);
@@ -44,6 +47,22 @@ float mandelbrot(dvec2 position) {
     return float(i);
 }
 
+float julia(dvec2 position) {
+    dvec2 z = position;
+    float i;
+    
+    for (i = 0.0; i < MAX_ITER; i++) {
+        z = dvec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + uShift;
+        if (dot(z, z) > 10.0) break;
+    }
+    if(i>=MAX_ITER){
+        return 0.;
+    }
+    i = i - log2(log2(dot(vec2(z), vec2(z)))) + 4.0;
+    return float(i);
+}
+
+
 vec3 coloring(float i) {
     return 0.5 * cos(i * libre + color) + 0.5;
 }
@@ -59,7 +78,7 @@ void main() {
     uv *= rot(angle);
     uv+=(2.*hash2(g_seed)-1.)/500.;
     //dvec2 scaledPos = dvec2(uv) * pow(zoom, 16.0) + pos;
-    dvec2 scaledPos2 = dvec2(uv) * pow(zoom, 16.0) + dvec2(-0.7615760010062,-0.0847596);
+    dvec2 scaledPos2 = dvec2(uv) * pow(zoom, 16.0) + pos; //dvec2(-0.7615760010062,-0.0847596);
 
     float d = mandelbrot(scaledPos2);
     vec3 color = coloring(d);

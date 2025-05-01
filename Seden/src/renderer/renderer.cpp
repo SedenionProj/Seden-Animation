@@ -9,6 +9,102 @@
 #include "src/object/object.hpp"
 #include "src/window.hpp"
 
+//path
+inline const char* pathFragmentShader = R"(#version 460
+
+out vec4 fragColor;
+
+in vec2 texCoord;
+
+in vec4 color;
+
+void main() {
+	fragColor = color;
+}
+)";
+
+inline const char* pathVertexShader = R"(#version 460
+
+struct Vertex {
+	vec4 color;
+	vec4 position;
+	float thickness;
+	int beginIndex;
+	vec2 padding;
+};
+
+layout(std430, binding = 0) buffer TVertex
+{
+   Vertex vertex[]; 
+};
+
+uniform float u_thickness;
+uniform mat4 view;
+uniform mat4 proj;
+
+out vec2 texCoord;
+out vec4 color;
+
+void main()
+{
+    // borrowed from https://stackoverflow.com/questions/3484260/opengl-line-width
+	int line_vert_id = gl_VertexID / 6;
+    int line_i = vertex[line_vert_id].beginIndex;
+    int tri_i  = gl_VertexID % 6;
+
+    
+
+    vec4 va[4];
+    for (int i=0; i<4; ++i)
+    {
+        va[i] = proj*view*vertex[line_i+i].position;
+        va[i].xyz /= abs(va[i].w);
+    }
+
+    vec2 v_line  = normalize(va[2].xy - va[1].xy);
+    vec2 nv_line = vec2(-v_line.y, v_line.x);
+
+    vec4 pos;
+    if (tri_i == 0 || tri_i == 1 || tri_i == 3)
+    {
+        color = vertex[line_i+1].color;
+
+        vec2 v_pred  = normalize(va[1].xy - va[0].xy);
+        vec2 v_miter = normalize(nv_line + vec2(-v_pred.y, v_pred.x));
+
+        pos = va[1];
+
+        float angle = dot(v_miter, nv_line);
+		
+		float thickness = vertex[line_i+1].thickness;
+
+        pos.xy += 0.001*v_miter * thickness * (tri_i == 1 ? -0.5 : 0.5) / max(angle, 0.2); // temp miter fix 
+    }
+    else
+    {
+        color = vertex[line_i+2].color;
+
+        vec2 v_succ  = normalize(va[3].xy - va[2].xy);
+        vec2 v_miter = normalize(nv_line + vec2(-v_succ.y, v_succ.x));
+
+        pos = va[2];
+
+        float angle = dot(v_miter, nv_line);
+
+		float thickness = vertex[line_i+2].thickness;
+
+        pos.xy += 0.001*v_miter * thickness * (tri_i == 5 ? 0.5 : -0.5) / max(angle, 0.2);
+    }
+
+    
+
+    pos.xyz *= abs(pos.w);
+    gl_Position = pos;
+
+    texCoord = pos.xy;
+}
+)";
+
 namespace Seden {
 	static void GLAPIENTRY MessageCallback(GLenum source,
 			GLenum type,
@@ -38,6 +134,7 @@ namespace Seden {
 		glEnable(GL_PROGRAM_POINT_SIZE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		// polygon
 		m_polygonData.vao= std::make_unique<VertexArray>();
 		m_polygonData.ibo = std::make_unique<IndexBuffer>();
 		m_polygonData.vbo = std::make_unique<VertexBuffer>();
@@ -48,13 +145,13 @@ namespace Seden {
 			3, // color
 		}));
 
+		// text
 		m_shader = std::make_unique<Shader>();
 		m_shader->createShader(letterVertexShader, letterFragmentShader);
 
 		m_font = std::make_unique<Font>();
 
-
-
+		// point
 		m_pointData.vao = std::make_unique<VertexArray>();
 		m_pointData.vbo = std::make_unique<VertexBuffer>();
 		m_pointData.shader = std::make_unique<Shader>();
@@ -65,6 +162,7 @@ namespace Seden {
 			1, // thickness
 			}));
 
+		// screen
 		m_screenShader.createShader(screenVertexShader, screenFragmentShader);
 		m_framebuffer = std::make_unique<Framebuffer>(m_window->getWidth(), m_window->getHeight());
 
@@ -77,6 +175,23 @@ namespace Seden {
 		m_screenQuadVAO = std::make_unique<VertexArray>();
 		m_vbo = std::make_unique<VertexBuffer>(sizeof(vertices), static_cast<void*>(vertices));
 		m_screenQuadVAO->addVertexBuffer(*m_vbo, { 2 });
+
+		// path
+		m_pathData.shader = std::make_unique<Shader>(pathVertexShader, pathFragmentShader);
+		//m_pathData.verticesList = {
+		//	{{1,0,0,1}, {-1  ,0.0,0,1}, 50.f, 0},
+		//	{{0,0,1,1}, {-0.5,0,0,  1},	50.f, 4},
+		//	{{1,0,1,1}, {-0.3,0.8,0,1}, 50.f, 0},
+		//	{{0,1,0,1}, {-0.2,0.8,0,1}, 50.f, 0},
+		//
+		//	{{0,1,0,1}, { 0.2,0.8,0,1}, 50.f, 0},
+		//	{{1,0,0,1}, { 0.3,0.8,0,1}, 50.f, 0},
+		//	{{1,1,0,1}, { 0.5,0,0,1},	50.f, 0},
+		//	{{1,0,0,1}, { 1  ,0,0,1},	50.f, 0},
+		//};
+		m_pathData.vao = std::make_unique<VertexArray>();
+		m_pathData.ssbo = std::make_unique<ShaderStorageBuffer>(m_pathData.verticesList.size()*sizeof(LineVertex), m_pathData.verticesList.data());
+		m_pathData.ssbo->bind(0);
 	}
 
 	Renderer::~Renderer()
@@ -136,18 +251,41 @@ namespace Seden {
 		if (Comp::Point::hasVertexCountChanged) {
 			m_pointData.verticesList.resize(Comp::Point::totalVertexCount);
 		}
+
+		if (Comp::Path::hasVertexCountChanged) {
+			m_pathData.verticesList.resize(Comp::Path::totalVertexCount);
+		}
 	}
 
 	void Renderer::endFrame()
 	{
+		if (Comp::Path::totalVertexCount) {
+			//reset
+			if (Comp::Path::hasVertexCountChanged) {
+				Comp::Path::hasVertexCountChanged = false;
+			}
+			m_pathData.vertexOffset = 0;
+			m_pathData.pathOffset = 0;
+
+			//drawing
+			m_pathData.ssbo->setData(m_pathData.verticesList.size() * sizeof(LineVertex), m_pathData.verticesList.data());
+			m_pathData.vao->bind();
+			m_pathData.shader->bind();
+			m_pathData.shader->setMat4("view", m_camera->getView());
+			m_pathData.shader->setMat4("proj", m_camera->getProjection());
+			glDrawArrays(GL_TRIANGLES, 0, Comp::Path::totalLineCount*6);
+		}
+
 		if (Comp::PolygonMesh::totalVertexCount) {
+			//reset
 			if (Comp::PolygonMesh::hasVertexCountChanged) {
 				m_polygonData.ibo->setData(m_polygonData.indicesList.size(), m_polygonData.indicesList.data());
 				Comp::PolygonMesh::hasVertexCountChanged = false;
 			}
 			m_polygonData.vbo->setData(Comp::PolygonMesh::totalVertexCount * sizeof(Comp::PolygonMesh::Vertex), m_polygonData.verticesList.data());
-
 			m_polygonData.vertexOffset = 0;
+
+			//drawing
 			m_polygonData.shader->bind();
 			m_polygonData.shader->setMat4("view", m_camera->getView());
 			m_polygonData.shader->setMat4("proj", m_camera->getProjection());
@@ -196,6 +334,28 @@ namespace Seden {
 		ImGui::Text("animation count %d", m_stats.animationCount);
 		ImGui::Text("object alive count %d", m_stats.objectAliveCount);
 		ImGui::End();
+	}
+
+	void Renderer::drawPath(Comp::Path& path) {
+		const size_t n = path.m_vertices.size();
+
+		for (int i = 0; i < n; i++) {
+			const auto& vert = path.m_vertices[i];
+			auto& vertex = m_pathData.verticesList[m_pathData.vertexOffset + i];
+
+			if (i < n - 3) {
+				// for each line, add beginIndex
+				m_pathData.verticesList[m_pathData.pathOffset].beginIndex = m_pathData.vertexOffset +i;
+				m_pathData.pathOffset += 1;
+			}
+			
+
+			vertex.position = glm::vec4(vert.position, 1);
+			vertex.color = vert.color;
+			vertex.thickness = vert.thickness;
+		}
+
+		m_pathData.vertexOffset += n;
 	}
 
 	void Renderer::drawConvexPolygon(Comp::Transform& transform, Comp::PolygonMesh& mesh)

@@ -127,7 +127,7 @@ namespace Seden {
 
 		class Text {
 		public:
-			explicit Text(std::string text, Comp::GroupObjects* letters, float scale);
+			explicit Text(std::string text, Comp::GroupObjects* letters, float scale, const glm::vec4& color);
 
 			void setText(const std::string& text) { m_text = text; reloadText(); };
 
@@ -140,10 +140,31 @@ namespace Seden {
 				return m_scale;
 			}
 
-		private:
+		public:
 			float m_scale;
 			std::string m_text;
+			glm::vec4 m_defaultColor;
 			Comp::GroupObjects* m_letters;
+		};
+
+		class Path {
+		public:
+			struct Vertex {
+				glm::vec4 color;
+				glm::vec3 position;
+				float thickness;
+			};
+		
+			Path(const std::vector<Vertex>& vertices);
+			
+			Path(const std::initializer_list<Comp::Path::Vertex> vertices);
+				
+
+		static bool hasVertexCountChanged;
+		static size_t totalVertexCount;
+		static size_t totalLineCount;
+
+		std::vector<Vertex> m_vertices;
 		};
 
 		class Point {

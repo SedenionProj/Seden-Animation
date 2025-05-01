@@ -92,6 +92,9 @@ namespace Seden {
 	void Shader::setVec3(const std::string& name, const glm::vec3& values) const {
 		glUniform3f(glGetUniformLocation(m_id, name.c_str()), values.x, values.y, values.z);
 	};
+	void Shader::setVec4(const std::string& name, const glm::vec4& values) const {
+		glUniform4f(glGetUniformLocation(m_id, name.c_str()), values.x, values.y, values.z, values.w);
+	};
 	void Shader::setVec2(const std::string& name, const glm::vec2& values) const {
 		glUniform2f(glGetUniformLocation(m_id, name.c_str()), values.x, values.y);
 	};

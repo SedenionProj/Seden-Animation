@@ -112,6 +112,10 @@ namespace Seden {
 		m_registry.view<Comp::Transform, Comp::Shader>().each([this](const auto object, auto& transform, auto& shader) {
 			m_renderer.drawShaderQuad(transform, shader);
 		});
+
+		m_registry.view<Comp::Path>().each([this](const auto object, auto& path) {
+			m_renderer.drawPath(path);
+		});
 	}
 
 	void ObjectScene::setCamera(std::shared_ptr<Camera> camera)
@@ -150,6 +154,9 @@ namespace Seden {
 
 			m_renderer.beginFrame();
 			m_renderer.draw(time, dt);
+			m_registry.view<Comp::Transform, Comp::GroupObjects, Comp::Text>().each([this](const auto object, auto& transform, auto& letters, auto& text) {
+				m_renderer.drawText(transform, letters, text);
+			});
 			m_renderer.endFrame();
 
 			time += dt;

@@ -5,8 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-//tmp
-
+// screen
 inline const char* screenFragmentShader = R"(#version 330 core
 out vec4 _outFragColor;
 uniform int iFrame;
@@ -60,8 +59,8 @@ in vec3 iFragPos;
 in vec2 iTexCoords;
 void main(){
 	float tex = texture(uTexture, iTexCoords).r;
-	if(tex<0.2||iColor.a<0.05) discard;
-	_outFragColor = vec4(tex)*iColor;
+	//if(tex<0.2||iColor.a<0.05) discard;
+	_outFragColor = vec4(iColor)*tex;
 })";
 
 inline const char* letterVertexShader = R"(#version 330 core
@@ -127,6 +126,7 @@ namespace Seden {
 		void setBool(const std::string& name, bool value) const;
 		void setInt(const std::string& name, int value) const;
 		void setFloat(const std::string& name, float value) const;
+		void setVec4(const std::string& name, const glm::vec4& values) const;
 		void setVec3(const std::string& name, const glm::vec3& values) const;
 		void setVec2(const std::string& name, const glm::vec2& values) const;
 		void setMat4(const std::string& name, const glm::mat4& matrix, const float instance = 1) const;

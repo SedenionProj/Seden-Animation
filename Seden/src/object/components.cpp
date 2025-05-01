@@ -201,8 +201,8 @@ namespace Seden {
 		}
 
 
-		Text::Text(std::string text, Comp::GroupObjects* letters, float scale)
-			:m_text(text), m_letters(letters), m_scale(scale) {
+		Text::Text(std::string text, Comp::GroupObjects* letters, float scale, const glm::vec4& color)
+			:m_text(text), m_letters(letters), m_scale(scale), m_defaultColor(color) {
 			reloadText();
 		};
 
@@ -213,7 +213,7 @@ namespace Seden {
                 if (!(32 <= c && c < 128 && c != ' ')) continue;
 				auto obj = Object::create();
 				obj->add<Comp::Transform>(glm::mat4(1));
-				obj->add<Comp::Color>(glm::vec4(1));
+				obj->add<Comp::Color>(m_defaultColor);
 				m_letters->addObject(obj);
 			}
 		}
@@ -235,5 +235,27 @@ namespace Seden {
 		// Shader implementation
 		Shader::Shader(uint32_t instanceCount, std::shared_ptr<Seden::Shader> shader)
 			: m_shader(shader) {}
+
+		// Path
+		size_t Path::totalVertexCount = 0;
+		size_t Path::totalLineCount= 0;
+		bool Path::hasVertexCountChanged = false;
+
+		Path::Path(const std::vector<Vertex>& vertices)
+			: m_vertices(vertices) {
+			hasVertexCountChanged = true;
+			totalVertexCount += vertices.size();
+			totalLineCount += vertices.size() - 3;
+		}
+
+
+		Path::Path(const std::initializer_list<Comp::Path::Vertex> vertices)
+			: m_vertices(vertices) {
+			hasVertexCountChanged = true;
+			totalVertexCount += vertices.size();
+			totalLineCount += vertices.size() - 3;
+		}
+
+		
 	}
 }

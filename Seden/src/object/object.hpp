@@ -163,14 +163,14 @@ namespace Seden {
 
 	class Text : public Object {
 	public:
-		static std::shared_ptr<Text> create(const std::string& text, const glm::vec3& position, float scale) {
-			return std::make_shared<Text>(text, position, scale);
+		static std::shared_ptr<Text> create(const std::string& text, const glm::vec3& position, float scale, const glm::vec4& color = glm::vec4(1)) {
+			return std::make_shared<Text>(text, position, scale, color);
 		}
 
-		Text(const std::string& text, const glm::vec3& position, float scale){
+		Text(const std::string& text, const glm::vec3& position, float scale, const glm::vec4& color){
 			add<Comp::Transform>(position);
 			auto& group = add<Comp::GroupObjects>();
-			add<Comp::Text>(text, &group, scale);
+			add<Comp::Text>(text, &group, scale, color);
 		}
 	};
 
@@ -195,6 +195,17 @@ namespace Seden {
 		ShaderQuad(std::shared_ptr<Seden::Shader> shader, uint32_t instanceCount, const glm::vec3& position) {
 			add<Comp::Transform>(position);
 			add<Comp::Shader>(instanceCount, shader);
+		}
+	};
+
+	class Path : public Object {
+	public:
+		static std::shared_ptr<Path> create(const std::initializer_list<Comp::Path::Vertex> vertices) {
+			return make_shared<Path>(vertices);
+		}
+
+		Path(const std::initializer_list<Comp::Path::Vertex> vertices) {
+			add<Comp::Path>(vertices);
 		}
 	};
 }

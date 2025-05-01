@@ -28,6 +28,7 @@ namespace Seden {
 
 		uint32_t getWidth() { return m_width; }
 		uint32_t getHeight() { return m_height; }
+		float getAspectRatio() { return (float) m_width / m_height; }
 
 	private:
 		uint32_t m_frameRate = 0;

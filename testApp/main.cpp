@@ -1,4 +1,5 @@
 #include "exampleScenes/mandelbulb/mandelbulb.h"
+#include "testScene.h"
 
 int main() {
 	try {

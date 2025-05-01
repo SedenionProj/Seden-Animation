@@ -19,9 +19,11 @@ uniform int iPass;
 uniform float zoom;
 uniform float libre;
 uniform float power;
+uniform float uCut;
 uniform vec2 pos;
 uniform vec3 color;
 uniform vec3 m_precision;
+uniform vec4 juliaPos;
 
 #define MAX_FLOAT 9.e+30
 #define MAX_ITER 1000
@@ -43,6 +45,19 @@ vec2 random_in_unit_disk(inout float seed) {
     float phi = h.y;
     float r = sqrt(h.x);
 	return r * vec2(sin(phi),cos(phi));
+}
+vec4 quatMult( vec4 q1, vec4 q2 ){
+    vec4 r;
+    r.x = q1.x*q2.x - dot( q1.yzw, q2.yzw );
+    r.yzw = q1.x*q2.yzw + q2.x*q1.yzw + cross( q1.yzw, q2.yzw );
+    return r;
+}
+
+vec4 quatSq( vec4 q ){
+    vec4 r;
+    r.x = q.x*q.x - dot( q.yzw, q.yzw );
+    r.yzw = 2.*q.x*q.yzw;
+    return r;
 }
 float sdMandelbulb(vec3 pos, out float t0) {
 	vec3 z = pos;
@@ -71,10 +86,98 @@ float sdMandelbulb(vec3 pos, out float t0) {
 	}
 	return 0.5*log(r)*r/dr;
 }
+float sdMandelbrotQuat(vec3 pos, out float t0){
+    vec4 c = vec4(pos,sin(iTime.x));
+    
+    float r = 0.;
+    float dr = 0.;
+    
+    vec4 z = vec4(0);
+    vec4 dz = vec4(0);
+
+    t0 = MAX_FLOAT;
+    for(int i = 0; i<40; i++){
+        dz = 2.*quatMult(z,dz)+vec4(1,0,0,0);
+        z = quatSq(z)+c;
+        
+        float zr = length(z);
+        t0 = min(t0, zr);
+        if(dot(z,z)>200.) break;
+    }
+    
+    r = length(z);
+    dr = length(dz);
+    return 0.5*r*log(r)/dr;
+}
+
+vec3 tripMult( vec3 t1, vec3 t2 ){
+    //return vec3(
+    //    t1.x*t2.x - t1.y*t2.y - t1.z*t2.z - t1.y*t2.z  - t1.z*t2.y, 
+    //    t1.x*t2.y + t1.y*t2.x,
+    //    t1.x*t2.z + t1.z*t2.x
+    //);
+
+    return vec3(
+        t1.x*t2.x - t1.y*t2.y - t1.z*t2.z,
+        t1.x*t2.y + t1.y*t2.x + t1.y*t2.z,
+        t1.x*t2.z + t1.z*t2.x + t1.z*t2.y
+    );
+}
+
+float sdMandelbrotTest(vec3 pos, out float t0){
+    vec3 c = vec3(pos);
+    
+    float r = 0.;
+    float dr = 0.;
+    
+    vec3 z = vec3(0);
+    vec3 dz = vec3(0);
+    t0 = MAX_FLOAT;
+    for(int i = 0; i<40; i++){
+        dz = 2.*tripMult(z,dz)+vec3(1,0,0);
+        z = tripMult(z,z)+c;
+        
+        if(dot(z,z)>200.) break;
+
+        float zr = length(z);
+        t0 = min(t0, zr);
+    }
+    
+    r = length(z);
+    dr = length(dz);
+    return 0.1*r*log(r)/dr;
+}
+
+float sdJuliaQuat(vec3 pos, out float t0){
+    vec4 c = vec4(pos,0);
+    
+    vec4 p = juliaPos; //vec4(sin(iTime.x)*cos(iTime.x), cos(iTime.x*3.), sin(iTime.x)*cos(iTime.x) ,0);
+    
+    float r = 0.;
+    float dr = 0.;
+    
+    vec4 z = c;
+    vec4 dz = vec4(1,0,0,0);
+
+    t0 = MAX_FLOAT;
+    for(int i = 0; i<40; i++){
+        dz = 2.*quatMult(z,dz);
+        z = quatSq(z)+p;
+        
+        if(dot(z,z)>200.) break;
+
+        float zr = length(z);
+        t0 = min(t0, zr);
+    }
+    
+    r = length(z);
+    dr = length(dz);
+    return 0.5*r*log(r)/dr;
+}
 float sdScene(vec3 p, out float t0){
     float h = MAX_FLOAT;
-    h=min(h,sdMandelbulb(p, t0));
-    //h=max(p.z, h);
+    h=min(h,sdMandelbrotTest(p, t0));
+    h=max(p.z+uCut, h);
     return h;
 }
 vec3 calcNormal(in vec3 p) {
@@ -223,7 +326,7 @@ void main() {
 
     if(iTime.x == 0){
         // init
-        arrayBuff[0] = 2.;
+        arrayBuff[0] = 1.5;
     }
 
     g_seed = float(base_hash(floatBitsToUint(gl_FragCoord.xy))) / float(0xffffffffU) + float(iTime.x+pow(iPass, 3));
@@ -240,8 +343,9 @@ void main() {
     Ray r = getRay(uv, o, normalize(-o));
 
     float placeHolder;
-    float speed = min(sdScene(o, placeHolder), 0.01)*zoom;
-    arrayBuff[0] -= speed * iTime.y;
+    float speed = min(sdScene(o-vec3(0.5,0,0)*0., placeHolder), 0.01)*zoom;
+    if(iPass == 0)
+        arrayBuff[0] -= speed * iTime.y;
 
     vec3 color = blinnPhong(r);
 
