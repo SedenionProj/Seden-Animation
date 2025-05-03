@@ -66,6 +66,24 @@ namespace Seden {
 		uint32_t getTexture() { return m_colorTex; }
 
 		void bind();
+		void bindDraw();
+		void unBind();
+	private:
+		uint32_t m_width;
+		uint32_t m_height;
+		uint32_t m_id;
+		uint32_t m_colorTex;
+	};
+
+	class FramebufferAA {
+	public:
+		FramebufferAA(uint32_t width, uint32_t height, int nbSamples = 2);
+		~FramebufferAA();
+
+		uint32_t getTexture() { return m_colorTex; }
+
+		void bind();
+		void bindRead();
 		void unBind();
 	private:
 		uint32_t m_width;

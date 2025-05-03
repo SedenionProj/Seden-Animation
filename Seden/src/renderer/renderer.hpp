@@ -57,7 +57,8 @@ namespace Seden {
 	private:
 		Shader m_screenShader;
 		std::unique_ptr<VertexBuffer> m_vbo;
-		std::unique_ptr<Framebuffer> m_framebuffer;
+		std::unique_ptr<FramebufferAA> m_MSAAfbo;
+		std::unique_ptr<Framebuffer> m_postProcessingFBO;
 		std::unique_ptr<VertexArray>  m_screenQuadVAO;
 
 		struct PathData {

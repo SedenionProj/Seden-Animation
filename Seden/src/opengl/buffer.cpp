@@ -148,8 +148,7 @@ namespace Seden {
 		if (ret_code != GL_FRAMEBUFFER_COMPLETE) {
 			DEBUG_ERROR("Failed to create Framebuffer : %u", ret_code);
 		}
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		unBind();
 	}
 	
 	Framebuffer::~Framebuffer() {
@@ -161,9 +160,59 @@ namespace Seden {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 	}
 
+	void Framebuffer::bindDraw()
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_id);
+	}
+
 	void Framebuffer::unBind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	// FramebufferAA
+
+	FramebufferAA::FramebufferAA(uint32_t width, uint32_t height, int nbSamples)
+		: m_width(width), m_height(height) {
+		glGenFramebuffers(1, &m_id);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+
+		GLint maxTexSize;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
+		DEBUG_ASSERT(width <= (uint32_t)maxTexSize && height <= (uint32_t)maxTexSize, "Framebuffer %u x %u too large (max : %i)", width, height, maxTexSize);
+
+		// Create texture
+		glGenTextures(1, &m_colorTex);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_colorTex);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, nbSamples, GL_RGBA8, width, height, GL_TRUE);
+		
+		// Attach texture
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_colorTex, 0);
+
+		GLenum ret_code = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (ret_code != GL_FRAMEBUFFER_COMPLETE) {
+			DEBUG_ERROR("Failed to create Framebuffer : %u", ret_code);
+		}
+		unBind();
+
+	}
+
+	FramebufferAA::~FramebufferAA() {
+		glDeleteFramebuffers(1, &m_id);
+	}
+
+	void FramebufferAA::bind()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+	}
+
+	void FramebufferAA::bindRead()
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id);
+	}
+
+	void FramebufferAA::unBind()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 }
