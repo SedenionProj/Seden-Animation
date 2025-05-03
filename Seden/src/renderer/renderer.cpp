@@ -5,7 +5,6 @@
 
 #include "src/renderer/renderer.hpp"
 #include "src/object/components.hpp"
-#include "src/logger.h"
 #include "src/object/object.hpp"
 #include "src/window.hpp"
 
@@ -134,6 +133,8 @@ namespace Seden {
 		glEnable(GL_PROGRAM_POINT_SIZE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		glViewport(0, 0, m_window->getWidth(), m_window->getHeight());
+
 		// polygon
 		m_polygonData.vao= std::make_unique<VertexArray>();
 		m_polygonData.ibo = std::make_unique<IndexBuffer>();
@@ -234,7 +235,6 @@ namespace Seden {
 		glfwPollEvents();
 		m_framebuffer->bind();
 		glClearColor(0,0,0, 1.0f);
-		//glClearColor(0.1f,0.1f,0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// imgui

@@ -1,9 +1,6 @@
-#include "buffer.hpp"
-#include "buffer.hpp"
 #include <glad/glad.h>
 
 #include "src/opengl/buffer.hpp"
-#include "src/logger.h"
 
 namespace Seden {
 

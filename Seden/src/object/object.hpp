@@ -1,10 +1,7 @@
 #pragma once
-#include <entt/entt.hpp>
-#include <glm/matrix.hpp>
-#include <string>
-
 #include "src/scene.hpp"
 #include "src/object/components.hpp"
+#include "src/animation/animation.hpp"
 
 namespace Seden {
 	class Object {

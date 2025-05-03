@@ -18,6 +18,8 @@ endif ()
 
 add_library (seden_lib ${SEDEN_SOURCE})
 
+target_precompile_headers(seden_lib PRIVATE ${CMAKE_SOURCE_DIR}/Seden/src/pch.h)
+
 target_include_directories (seden_lib PUBLIC
 	Seden
 )
@@ -47,6 +49,8 @@ file(GLOB_RECURSE TESTAPP_SOURCE
 )
 
 add_executable (testApp ${TESTAPP_SOURCE})
+
+target_precompile_headers(testApp PRIVATE ${CMAKE_SOURCE_DIR}/Seden/src/pch.h)
 
 target_link_libraries (testApp PRIVATE
 	seden_lib

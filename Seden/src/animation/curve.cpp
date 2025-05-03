@@ -1,7 +1,4 @@
-#include <glm/glm.hpp>
-
 #include "src/animation/curve.hpp"
-#include "src/logger.h"
 
 namespace Seden {
 	float Curve::operator()(float time) const

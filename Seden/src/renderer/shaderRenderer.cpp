@@ -4,7 +4,6 @@
 #include <imgui_impl_opengl3.h>
 #include "src/window.hpp"
 #include "src/renderer/shaderRenderer.hpp"
-#include "src/logger.h"
 #include "src/object/object.hpp"
 
 namespace Seden {

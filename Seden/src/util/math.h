@@ -1,5 +1,4 @@
 #pragma once
-#include <algorithm>
 
 namespace Seden {
 	constexpr float PI = 3.1415927f;

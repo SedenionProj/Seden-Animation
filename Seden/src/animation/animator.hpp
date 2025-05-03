@@ -1,9 +1,5 @@
 #pragma once
-#include <memory>
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include "src/util/math.h"
-#include "src/logger.h"
 
 namespace Seden {
 	class Object;
@@ -118,5 +114,18 @@ namespace Seden {
 	private:
 		T& m_var;
 		F m_fun;
+	};
+
+	class Fun : public Animator {
+	public:
+		Fun(std::function<void(float, float)> fun)
+			: m_fun(fun) {}
+
+		void update(float time, float dt) override {
+			m_fun(time, dt);
+		}
+
+	private:
+		std::function<void(float, float)> m_fun;
 	};
 }

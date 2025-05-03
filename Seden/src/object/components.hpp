@@ -1,11 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <array>
-#include <memory>
-#include <filesystem>
-#include <glm/glm.hpp>
-
 namespace Seden {
 
 	class Object;

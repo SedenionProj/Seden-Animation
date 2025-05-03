@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include "src/opengl/buffer.hpp"
 
 namespace Seden {

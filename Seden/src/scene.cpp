@@ -1,6 +1,7 @@
 #include "src/scene.hpp"
 #include "src/object/object.hpp"
 #include "src/window.hpp"
+
 namespace Seden {
 	void Scene::wait(float seconds) {
 		m_waiting = true;
@@ -29,7 +30,7 @@ namespace Seden {
 		m_waitSync.unBlock();
 	}
 
-	void Scene::anim(Animator* anim, float time, float shift, Curve* curve)
+	void Scene::anim(Animator* anim, float time, float shift, Curve* curve )
 	{
 		m_animations.push_back(std::make_unique<TimedAnimation>(anim, curve, time, shift));
 	}
@@ -165,5 +166,9 @@ namespace Seden {
 
 		}
 		DEBUG_MSG("end of animation loop");
+	}
+	void ShaderScene::init(Window* window) {
+		m_window = window;
+		m_renderer.init(window);
 	}
 }

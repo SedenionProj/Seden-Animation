@@ -1,10 +1,4 @@
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-
 #include "src/object/components.hpp"
-#include "src/logger.h"
 #include "src/object/object.hpp"
 #include "src/opengl/shader.hpp"
 

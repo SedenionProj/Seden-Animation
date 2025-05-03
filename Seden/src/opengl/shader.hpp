@@ -1,10 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <filesystem>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 // screen
 inline const char* screenFragmentShader = R"(#version 330 core
 out vec4 _outFragColor;

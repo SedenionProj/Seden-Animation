@@ -1,5 +1,4 @@
 #include "src/animation/animator.hpp"
-#include "src/logger.h"
 #include "src/object/object.hpp"
 
 

@@ -1,9 +1,6 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <glad/glad.h>
-#include <memory>
-
 #include "src/font.hpp"
-#include "src/logger.h"
 
 namespace Seden {
 	

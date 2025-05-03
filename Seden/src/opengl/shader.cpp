@@ -1,7 +1,5 @@
 #include <glad/glad.h>
-#include <fstream>
-#include <sstream>
-#include "src/logger.h"
+
 #include "src/opengl/shader.hpp"
 
 namespace Seden {
@@ -39,7 +37,7 @@ namespace Seden {
 	std::string Shader::processShader(const std::filesystem::path& shaderPath) {
 		std::ifstream file(shaderPath);
 		if (!file.is_open()) {
-			std::cerr << "Failed to open shader file: " << shaderPath << std::endl;
+			DEBUG_ERROR("Failed to open shader file: %s", shaderPath);
 			return "";
 		}
 

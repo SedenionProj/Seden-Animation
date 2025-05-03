@@ -1,14 +1,8 @@
 #pragma once
-#include <entt/entt.hpp>
-#include <type_traits>
-#include <thread>
-#include <vector>
-
 #include "src/renderer/renderer.hpp"
 #include "src/renderer/shaderRenderer.hpp"
 #include "src/animation/curve.hpp"
 #include "src/animation/animation.hpp"
-#include "src/logger.h"
 #include "src/util/clock.hpp"
 #include "src/util/sync.h"
 
@@ -77,10 +71,7 @@ namespace Seden {
 		}
 
 		void startAnimationLoop() override;
-		void init(Window* window) override {
-			m_window = window;
-			m_renderer.init(window);
-		}
+		void init(Window* window) override;
 
 		void addUniform(ShaderDataType type, const std::string& name, void* value, float min=0, float max=1, int precision=3) {
 			m_renderer.m_uniforms.push_back({ value, name, type, {min, max, precision} });

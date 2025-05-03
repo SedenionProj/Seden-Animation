@@ -326,7 +326,7 @@ void main() {
 
     if(iTime.x == 0){
         // init
-        arrayBuff[0] = 1.5;
+        arrayBuff[0] = 2.5;
     }
 
     g_seed = float(base_hash(floatBitsToUint(gl_FragCoord.xy))) / float(0xffffffffU) + float(iTime.x+pow(iPass, 3));

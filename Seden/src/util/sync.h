@@ -1,5 +1,4 @@
-#include <mutex>
-#include <condition_variable>
+#pragma once
 
 namespace Seden {
 	class Sync {

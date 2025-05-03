@@ -1,4 +1,3 @@
-#include <string>
 #include <glad/glad.h>
 #include "src/window.hpp"
 

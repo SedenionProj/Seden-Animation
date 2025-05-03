@@ -1,5 +1,3 @@
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include "src/application.hpp"
 #include "src/object/object.hpp"
 #include "src/object/components.hpp"
@@ -138,17 +136,11 @@ public:
 	}
 };
 
-/*
-Line::create(a, b);
-LineStrip::create({...});
-Bezier::create({...});
-*/
-
 class Mandelbulb : public ShaderScene {
 public:
 	Mandelbulb() : ShaderScene(
 		"C:/Users/Gerome/source/repos/Seden-Animation/Seden/assets/shaders/basicPosVS.glsl",
-		"C:/Users/Gerome/source/repos/Seden-Animation/testApp/exampleScenes/mandelbulb/mandelbulbFS.glsl", 1) {
+		"C:/Users/Gerome/source/repos/Seden-Animation/testApp/exampleScenes/mandelbulb/mandelbulbFS.glsl", 15) {
 	}
 	float zoom = 0.f;
 	float libre = 5.f;
@@ -157,7 +149,7 @@ public:
 	vec3 m_precision = { 0.0001, 100,0};
 	vec4 juliaPos = {0.00, 0,0,0};
 	float power = 2;
-	float uCut = -1.2;
+	float uCut = -10.;
 
 	void animation() override {
 		//m_animationSpeed = 10.25;
@@ -174,17 +166,11 @@ public:
 		
 		//unBlock();
 
-		//block();
-		//animAttach(new VarPositionFun(pos, [&](float t, float dt) {
-		//	text->get<Comp::Text>().setText(
-		//		"pos = (" + std::to_string(juliaPos.x) + 
-		//		") + (" + std::to_string(juliaPos.y) + 
-		//		"i) + (" + std::to_string(juliaPos.z) + 
-		//		"j) + (" + std::to_string(juliaPos.w) + 
-		//		"k)");
-		//	return vec2(t * 0.05 - 2.5, -3.1415 / 2.);
-		//	}));
-		//unBlock();
+		block();
+		animAttach(new VarPositionFun(pos, [&](float t, float dt) {
+			return vec2(t*0.5 - 2.5, -3.1415 / 2.);
+			}));
+		unBlock();
 
 		//wait(1);
 		//
@@ -194,11 +180,11 @@ public:
 		//	}), 2);
 		//unBlock();
 		//
-		//wait(2);
-		//
-		//block();
-		//anim(new ChangeTo(uCut, .0f), 5.,0, new EaseInOut(5));
-		//unBlock();
+		wait(2);
+
+		block();
+		//anim(new ChangeTo(zoom, .01f), 5., 0, new EaseInOut(5));
+		unBlock();
 		//
 		//wait(4);
 		//
